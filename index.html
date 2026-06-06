@@ -119,6 +119,8 @@
     display: flex; align-items: center; gap: 6px;
   }
   .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .section-label .tip-wrap { margin-left: 2px; }
+  .section-label .tip-box { font-weight: 400; text-transform: none; letter-spacing: 0; }
   .field { margin-bottom: .875rem; }
   .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-family: var(--mono); }
   .field input, .field select {
@@ -428,12 +430,12 @@
         </div>
       </div>
       <div class="section">
-        <div class="section-label">積み込み (発射台 → ロケット)</div>
+        <div class="section-label">積み込み (発射台 → ロケット) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box">発射前にアイテムをロケットへ移動します。発射台スロット1〜9はホッパー用インプットなので、10番以降を指定してください。</div></span></div>
         <div class="slot-list" id="loadSlots"></div>
         <button class="add-btn" onclick="addLoad()">+ スロット追加</button>
       </div>
       <div class="section">
-        <div class="section-label">降ろし (ロケット → 発射台)</div>
+        <div class="section-label">降ろし (ロケット → 発射台) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box">帰還後にロケットのアイテムを発射台へ移動します。積み込みと逆のスロット番号を指定するのが一般的です。</div></span></div>
         <div class="slot-list" id="unloadSlots"></div>
         <button class="add-btn" onclick="addUnload()">+ スロット追加</button>
       </div>
@@ -704,48 +706,48 @@ local RETURN_WAIT     = ${returnWait}
 
 local launch_pad = peripheral.wrap(PERIPHERAL)
 if not launch_pad then
-  error("発射台が見つかりません: " .. PERIPHERAL)
+  error("Launch pad not found: " .. PERIPHERAL)
 end
 
-print("[起動] Cargo Rocket 自動化スクリプト開始")
+print("[BOOT] Cargo Rocket automation started")
 print("[設定] 目的地: " .. PLANET)
 
 while true do
 
-  print("[待機] エネルギー充電中...")
+  print("[WAIT] Charging energy...")
   while true do
     local energy   = launch_pad.getEnergy()
     local required = launch_pad.getEnergyRequiredForLaunch()
     print("  エネルギー: " .. energy .. " / " .. required)
     if energy >= required then
-      print("[OK] エネルギー充填完了")
+      print("[OK] Energy charged")
       break
     end
     sleep(ENERGY_INTERVAL)
   end
 
   if not launch_pad.isRocketPresent() then
-    print("[警告] ロケットが存在しません。待機...")
+    print("[WARN] No rocket found. Waiting...")
     sleep(ENERGY_INTERVAL)
   else
-    print("[積込] アイテムをロケットへ移動中...")
+    print("[LOAD] Moving items to rocket...")
 ${loadLines}
-    print("[OK] 積み込み完了")
+    print("[OK] Items loaded")
 
-    print("[発射] " .. PLANET .. " へ発射！")
+    print("[LAUNCH] Launching to " .. PLANET)
     local ok, err = pcall(function()
       launch_pad.launch(PLANET)
     end)
 
     if not ok then
-      print("[エラー] 発射失敗: " .. tostring(err))
+      print("[ERROR] Launch failed: " .. tostring(err))
       sleep(ENERGY_INTERVAL)
     else
-      print("[飛行中] 帰還まで " .. RETURN_WAIT .. " 秒待機...")
+      print("[FLIGHT] Waiting " .. RETURN_WAIT .. " sec for return...")
       sleep(RETURN_WAIT)
-      print("[降ろし] ロケットからアイテムを回収中...")
+      print("[UNLOAD] Retrieving items from rocket...")
 ${unloadLines}
-      print("[完了] サイクル完了。次のサイクルへ...")
+      print("[DONE] Cycle complete. Starting next cycle...")
     end
   end
 
