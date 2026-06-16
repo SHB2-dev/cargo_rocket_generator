@@ -85,7 +85,8 @@ header h1{font-size:15px;font-weight:800;letter-spacing:-.02em;}
 .palette-section{display:flex;flex-direction:column;gap:4px;min-width:120px;}
 .palette-section+.palette-section{padding-left:.75rem;border-left:1px solid var(--border);}
 .palette-title{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:3px;}
-.palette-block{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:6px;border:1px solid var(--border);cursor:grab;font-size:11px;font-weight:600;transition:opacity .15s,transform .1s;user-select:none;white-space:nowrap;}
+.palette-block{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:6px;border:1px solid var(--border);cursor:grab;font-size:11px;font-weight:600;transition:opacity .15s,transform .1s;user-select:none;-webkit-user-select:none;-webkit-user-drag:element;white-space:nowrap;}
+.palette-block *{pointer-events:none;}
 .palette-block:hover{opacity:.8;transform:scale(1.02);}
 .palette-block:active{cursor:grabbing;}
 .pb-loop{background:rgba(124,92,252,.15);border-color:rgba(124,92,252,.4);color:var(--accent2);}
@@ -728,25 +729,27 @@ document.getElementById('tab-visual').addEventListener('dragstart',e=>{
   if(pb){dragSrcType=pb.dataset.type;dragSrcIdx=null;e.dataTransfer.effectAllowed='copy';e.dataTransfer.setData('text/plain',pb.dataset.type);}
 });
 
-// canvasAreaへのドロップ（委譲）
+// canvasAreaへのドロップ（一度だけ登録、以降は常に有効）
+let canvasDropInitialized=false;
 function initCanvasDrop(){
+  if(canvasDropInitialized)return;
   const area=document.getElementById('canvasArea');
   if(!area)return;
+  canvasDropInitialized=true;
   area.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';});
   area.addEventListener('drop',e=>{
     e.preventDefault();
-    // canvas内の既存ブロック上へのドロップはrenderVisualBlocks内のイベントで処理
-    // ここはキャンバス空白部分へのドロップのみ処理
-    if(e.target===area||e.target.classList.contains('canvas-empty')||e.target.closest('.canvas-empty')){
-      if(dragSrcType!==null&&dragSrcIdx===null){
-        const def=BLOCK_DEFS[dragSrcType];if(!def){dragSrcType=null;return;}
+    // 既存ブロック上にドロップされた場合はそのブロックのdropハンドラが処理するのでスキップ
+    if(e.target.closest('.canvas-block'))return;
+    if(dragSrcType!==null&&dragSrcIdx===null){
+      const def=BLOCK_DEFS[dragSrcType];
+      if(def){
         const params={};def.params.forEach(p=>params[p.key]=p.def);
         vbBlocks.push({type:dragSrcType,params});
         renderVisualBlocks();
-        initCanvasDrop();
       }
-      dragSrcType=null;dragSrcIdx=null;
     }
+    dragSrcType=null;dragSrcIdx=null;
   });
 }
 function renderVisualBlocks(){
@@ -763,9 +766,9 @@ function renderVisualBlocks(){
     div.className='canvas-block '+def.cls;
     div.draggable=true;
     div.dataset.idx=i;
-    div.addEventListener('dragstart',e=>{dragSrcIdx=i;dragSrcType=blk.type;e.dataTransfer.effectAllowed='move';div.classList.add('dragging');});
+    div.addEventListener('dragstart',e=>{e.stopPropagation();dragSrcIdx=i;dragSrcType=blk.type;e.dataTransfer.effectAllowed='move';div.classList.add('dragging');});
     div.addEventListener('dragend',()=>div.classList.remove('dragging'));
-    div.addEventListener('dragover',e=>{e.preventDefault();div.classList.add('drag-over');});
+    div.addEventListener('dragover',e=>{e.preventDefault();e.stopPropagation();div.classList.add('drag-over');});
     div.addEventListener('dragleave',()=>div.classList.remove('drag-over'));
     div.addEventListener('drop',e=>{
       e.preventDefault();e.stopPropagation();div.classList.remove('drag-over');
