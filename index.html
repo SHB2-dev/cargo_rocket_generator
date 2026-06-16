@@ -1,782 +1,1115 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cargo Rocket Script Generator</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0b0f;
-    --surface: #111318;
-    --surface2: #191c24;
-    --border: #2a2d3a;
-    --accent: #7c5cfc;
-    --accent2: #c084fc;
-    --green: #22d3a0;
-    --amber: #f59e0b;
-    --red: #ef4444;
-    --text: #e8e9f0;
-    --muted: #6b7280;
-    --mono: 'Space Mono', monospace;
-    --sans: 'Syne', sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    background-image:
-      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124,92,252,0.15) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(192,132,252,0.1) 0%, transparent 60%);
-  }
+:root{--bg:#0a0b0f;--surface:#111318;--surface2:#191c24;--border:#2a2d3a;--accent:#7c5cfc;--accent2:#c084fc;--green:#22d3a0;--amber:#f59e0b;--red:#ef4444;--blue:#38bdf8;--text:#e8e9f0;--muted:#6b7280;--mono:'Space Mono',monospace;--sans:'Syne',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;background-image:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(124,92,252,.15) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 110%,rgba(192,132,252,.1) 0%,transparent 60%);}
+header{border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;gap:.75rem;height:56px;position:sticky;top:0;background:rgba(10,11,15,.95);backdrop-filter:blur(8px);z-index:100;}
+.logo{width:28px;height:28px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+header h1{font-size:15px;font-weight:800;letter-spacing:-.02em;}
+.version-badge{font-size:10px;font-family:var(--mono);background:var(--surface2);color:var(--muted);border:1px solid var(--border);padding:2px 8px;border-radius:20px;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:6px;}
+.lang-toggle{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px;}
+.lang-btn{background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer;transition:background .15s,color .15s;}
+.lang-btn:hover{color:var(--text);}.lang-btn.active{background:var(--accent2);color:#fff;}
+.tabs{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px;}
+.tab-btn{background:none;border:none;color:var(--muted);font-family:var(--sans);font-size:12px;font-weight:600;padding:5px 12px;border-radius:5px;cursor:pointer;transition:background .15s,color .15s;}
+.tab-btn:hover{color:var(--text);}.tab-btn.active{background:var(--accent);color:#fff;}
+.tab-page{display:none;}.tab-page.active{display:block;}
 
-  /* ===== HEADER ===== */
-  header {
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    height: 56px;
-    position: sticky;
-    top: 0;
-    background: rgba(10,11,15,0.95);
-    backdrop-filter: blur(8px);
-    z-index: 100;
-  }
-  .logo {
-    width: 30px; height: 30px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 7px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px; flex-shrink: 0;
-  }
-  header h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
-  .version-badge {
-    font-size: 11px; font-family: var(--mono);
-    background: var(--surface2); color: var(--muted);
-    border: 1px solid var(--border);
-    padding: 3px 9px; border-radius: 20px;
-  }
+/* GENERATOR */
+.gen-layout{display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:calc(100vh - 56px);}
+.config-panel{padding:1.5rem;border-right:1px solid var(--border);overflow-y:auto;}
+.output-panel{padding:1.5rem;display:flex;flex-direction:column;gap:.75rem;}
+.section{margin-bottom:1.5rem;}
+.section-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--accent2);margin-bottom:.6rem;display:flex;align-items:center;gap:6px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.section-label .tip-wrap{margin-left:2px;}.section-label .tip-box{font-weight:400;text-transform:none;letter-spacing:0;}
+.field{margin-bottom:.75rem;}
+.field label{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-bottom:4px;font-family:var(--mono);}
+.field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:12px;padding:7px 9px;outline:none;transition:border-color .15s;}
+.field input:focus,.field select:focus{border-color:var(--accent);}
+.field input::placeholder{color:var(--muted);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.mode-toggle{display:flex;gap:5px;margin-bottom:1rem;}
+.mode-btn{flex:1;padding:7px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:var(--sans);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center;}
+.mode-btn:hover{border-color:var(--accent);color:var(--text);}
+.mode-btn.active{background:rgba(124,92,252,.15);border-color:var(--accent);color:var(--accent2);}
+.mode-panel{display:none;}.mode-panel.active{display:block;}
+.slot-list{display:flex;flex-direction:column;gap:5px;}
+.slot-item{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 7px;font-family:var(--mono);font-size:11px;}
+.slot-item span{color:var(--muted);white-space:nowrap;font-size:10px;}
+.slot-item input{width:46px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:11px;padding:2px 5px;text-align:center;outline:none;}
+.slot-item input:focus{border-color:var(--accent);}
+.arrow{color:var(--accent);font-size:12px;flex-shrink:0;}
+.del-btn{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;padding:1px 3px;border-radius:3px;transition:color .15s,background .15s;}
+.del-btn:hover{color:var(--red);background:rgba(239,68,68,.1);}
+.add-btn{width:100%;margin-top:5px;background:transparent;border:1px dashed var(--border);border-radius:6px;color:var(--muted);font-family:var(--mono);font-size:11px;padding:6px;cursor:pointer;transition:border-color .15s,color .15s;}
+.add-btn:hover{border-color:var(--accent);color:var(--accent);}
+.gen-btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-size:14px;font-weight:700;padding:12px;cursor:pointer;letter-spacing:.02em;transition:opacity .15s,transform .1s;margin-top:.5rem;}
+.gen-btn:hover{opacity:.9;}.gen-btn:active{transform:scale(.98);}
+.output-header{display:flex;align-items:center;justify-content:space-between;}
+.output-title{font-size:11px;font-family:var(--mono);color:var(--muted);}
+.output-actions{display:flex;gap:5px;}
+.icon-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:11px;padding:4px 10px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;gap:4px;}
+.icon-btn:hover{border-color:var(--accent);background:rgba(124,92,252,.08);}
+.icon-btn.success{border-color:var(--green);color:var(--green);}
+.code-area{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:auto;position:relative;}
+.code-area pre{font-family:var(--mono);font-size:12px;line-height:1.75;padding:1.25rem;color:var(--text);white-space:pre;min-height:100%;}
+.placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:260px;gap:.75rem;color:var(--muted);}
+.placeholder .icon{font-size:36px;opacity:.3;}.placeholder p{font-size:12px;font-family:var(--mono);}
+.kw{color:#c084fc;}.str{color:#86efac;}.num{color:#fbbf24;}.cmt{color:#4b5563;font-style:italic;}.fn{color:#7dd3fc;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;text-align:center;}
+.stat-card .val{font-size:18px;font-weight:800;color:var(--accent2);font-family:var(--mono);}
+.stat-card .lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
 
-  /* ===== TABS ===== */
-  .tabs {
-    margin-left: auto;
-    display: flex;
-    gap: 2px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 3px;
-  }
-  .tab-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 600;
-    padding: 5px 14px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background .15s, color .15s;
-  }
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active {
-    background: var(--accent);
-    color: #fff;
-  }
+/* TOOLTIP */
+.tip-wrap{position:relative;display:inline-flex;}
+.tip-btn{width:14px;height:14px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:8px;font-family:var(--mono);font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s,color .15s;line-height:1;}
+.tip-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+.tip-box{display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);width:220px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:11px;font-family:var(--sans);color:var(--text);line-height:1.6;z-index:300;box-shadow:0 4px 20px rgba(0,0,0,.4);pointer-events:none;}
+.tip-box::before{content:'';position:absolute;bottom:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-bottom-color:var(--border);}
+.tip-wrap:hover .tip-box,.tip-btn:focus + .tip-box{display:block;}
 
-  /* ===== TAB PAGES ===== */
-  .tab-page { display: none; }
-  .tab-page.active { display: block; }
+/* VISUAL BUILDER */
+.vb-layout{display:grid;grid-template-rows:auto 1fr;grid-template-columns:1fr 1fr;min-height:calc(100vh - 56px);}
+.vb-palette{grid-column:1/-1;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);background:var(--surface);display:flex;flex-wrap:wrap;gap:.75rem;align-items:flex-start;}
+.vb-canvas{padding:1.25rem;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface);}
+.vb-output{padding:1.25rem;display:flex;flex-direction:column;gap:.75rem;}
+.palette-section{display:flex;flex-direction:column;gap:4px;min-width:120px;}
+.palette-section+.palette-section{padding-left:.75rem;border-left:1px solid var(--border);}
+.palette-title{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:3px;}
+.palette-block{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:6px;border:1px solid var(--border);cursor:grab;font-size:11px;font-weight:600;transition:opacity .15s,transform .1s;user-select:none;white-space:nowrap;}
+.palette-block:hover{opacity:.8;transform:scale(1.02);}
+.palette-block:active{cursor:grabbing;}
+.pb-loop{background:rgba(124,92,252,.15);border-color:rgba(124,92,252,.4);color:var(--accent2);}
+.pb-energy{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.35);color:var(--amber);}
+.pb-fuel{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.35);color:#f87171;}
+.pb-check{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.35);color:var(--blue);}
+.pb-load{background:rgba(34,211,160,.12);border-color:rgba(34,211,160,.35);color:var(--green);}
+.pb-unload{background:rgba(34,211,160,.12);border-color:rgba(34,211,160,.35);color:var(--green);}
+.pb-launch{background:rgba(192,132,252,.15);border-color:rgba(192,132,252,.4);color:var(--accent2);}
+.pb-wait{background:rgba(107,114,128,.15);border-color:rgba(107,114,128,.4);color:var(--muted);}
+.pb-log{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.35);color:var(--blue);}
+.pb-cargo{background:rgba(34,211,160,.12);border-color:rgba(34,211,160,.35);color:var(--green);}
+.canvas-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.canvas-title{font-size:11px;font-family:var(--mono);color:var(--muted);}
+.canvas-actions{display:flex;gap:5px;}
+.canvas-area{min-height:200px;flex:1;display:flex;flex-direction:column;gap:6px;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow-y:auto;}
+.canvas-block{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;border-radius:7px;border:1px solid var(--border);cursor:grab;position:relative;transition:box-shadow .15s;}
+.canvas-block:hover{box-shadow:0 0 0 1px var(--accent);}
+.canvas-block.dragging{opacity:.4;}
+.canvas-block.drag-over{box-shadow:0 -2px 0 var(--accent2);}
+.cb-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.cb-body{flex:1;}
+.cb-title{font-size:12px;font-weight:700;margin-bottom:4px;}
+.cb-params{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
+.cb-param{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);}
+.cb-param input,.cb-param select{background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:10px;padding:2px 5px;outline:none;width:auto;}
+.cb-param input{width:70px;}.cb-param select{width:auto;}
+.cb-param input:focus,.cb-param select:focus{border-color:var(--accent);}
+.cb-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 4px;border-radius:3px;transition:color .15s;}
+.cb-del:hover{color:var(--red);}
+.cb-move{display:flex;flex-direction:column;gap:1px;margin-right:2px;}
+.cb-move button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:10px;line-height:1;padding:1px 3px;border-radius:2px;}
+.cb-move button:hover{color:var(--text);background:var(--surface2);}
+.canvas-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;color:var(--muted);font-size:12px;gap:.5rem;font-family:var(--mono);}
+.canvas-empty .icon{font-size:32px;opacity:.3;}
+.vb-gen-btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-size:14px;font-weight:700;padding:11px;cursor:pointer;transition:opacity .15s,transform .1s;}
+.vb-gen-btn:hover{opacity:.9;}.vb-gen-btn:active{transform:scale(.98);}
 
-  /* ===== GENERATOR ===== */
-  .gen-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    min-height: calc(100vh - 56px);
-  }
-  .config-panel {
-    padding: 2rem;
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-  }
-  .output-panel {
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .section { margin-bottom: 1.75rem; }
-  .section-label {
-    font-size: 11px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: .12em;
-    color: var(--accent2); margin-bottom: .75rem;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  .section-label .tip-wrap { margin-left: 2px; }
-  .section-label .tip-box { font-weight: 400; text-transform: none; letter-spacing: 0; }
-  .field { margin-bottom: .875rem; }
-  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-family: var(--mono); }
-  .field input, .field select {
-    width: 100%; background: var(--surface2);
-    border: 1px solid var(--border); border-radius: 6px;
-    color: var(--text); font-family: var(--mono); font-size: 13px;
-    padding: 8px 10px; outline: none; transition: border-color .15s;
-  }
-  .field input:focus, .field select:focus { border-color: var(--accent); }
-  .field input::placeholder { color: var(--muted); }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .slot-list { display: flex; flex-direction: column; gap: 6px; }
-  .slot-item {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 6px; padding: 6px 8px;
-    font-family: var(--mono); font-size: 12px;
-  }
-  .slot-item span { color: var(--muted); white-space: nowrap; font-size: 11px; }
-  .slot-item input {
-    width: 52px; background: var(--bg);
-    border: 1px solid var(--border); border-radius: 4px;
-    color: var(--text); font-family: var(--mono);
-    font-size: 12px; padding: 3px 6px; text-align: center; outline: none;
-  }
-  .slot-item input:focus { border-color: var(--accent); }
-  .arrow { color: var(--accent); font-size: 14px; flex-shrink: 0; }
-  .del-btn {
-    margin-left: auto; background: none; border: none;
-    color: var(--muted); cursor: pointer; font-size: 14px;
-    line-height: 1; padding: 2px 4px; border-radius: 3px;
-    transition: color .15s, background .15s;
-  }
-  .del-btn:hover { color: var(--red); background: rgba(239,68,68,.1); }
-  .add-btn {
-    width: 100%; margin-top: 6px; background: transparent;
-    border: 1px dashed var(--border); border-radius: 6px;
-    color: var(--muted); font-family: var(--mono); font-size: 12px;
-    padding: 7px; cursor: pointer; transition: border-color .15s, color .15s;
-  }
-  .add-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .gen-btn {
-    width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none; border-radius: 8px; color: #fff;
-    font-family: var(--sans); font-size: 15px; font-weight: 700;
-    padding: 13px; cursor: pointer; letter-spacing: .02em;
-    transition: opacity .15s, transform .1s; margin-top: .5rem;
-  }
-  .gen-btn:hover { opacity: .9; }
-  .gen-btn:active { transform: scale(.98); }
-  .output-header { display: flex; align-items: center; justify-content: space-between; }
-  .output-title { font-size: 12px; font-family: var(--mono); color: var(--muted); }
-  .output-actions { display: flex; gap: 6px; }
-  .icon-btn {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 6px; color: var(--text); font-family: var(--mono);
-    font-size: 12px; padding: 5px 12px; cursor: pointer;
-    transition: border-color .15s, background .15s;
-    display: flex; align-items: center; gap: 5px;
-  }
-  .icon-btn:hover { border-color: var(--accent); background: rgba(124,92,252,.08); }
-  .icon-btn.success { border-color: var(--green); color: var(--green); }
-  .code-area {
-    flex: 1; background: var(--surface);
-    border: 1px solid var(--border); border-radius: 8px;
-    overflow: auto; position: relative;
-  }
-  .code-area pre {
-    font-family: var(--mono); font-size: 12.5px; line-height: 1.75;
-    padding: 1.25rem; color: var(--text); white-space: pre; min-height: 100%;
-  }
-  .placeholder {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; height: 100%; min-height: 300px;
-    gap: .75rem; color: var(--muted);
-  }
-  .placeholder .icon { font-size: 40px; opacity: .3; }
-  .placeholder p { font-size: 13px; font-family: var(--mono); }
-  .kw { color: #c084fc; } .str { color: #86efac; }
-  .num { color: #fbbf24; } .cmt { color: #4b5563; font-style: italic; }
-  .fn  { color: #7dd3fc; }
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .stat-card {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 6px; padding: 10px 12px; text-align: center;
-  }
-  .stat-card .val { font-size: 20px; font-weight: 800; color: var(--accent2); font-family: var(--mono); }
-  .stat-card .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
-
-  /* ===== HELP ===== */
-  .help-layout {
-    display: grid;
-    grid-template-columns: 210px 1fr;
-    min-height: calc(100vh - 56px);
-  }
-  .sidenav {
-    padding: 1.5rem 1rem;
-    border-right: 1px solid var(--border);
-    position: sticky;
-    top: 56px;
-    height: calc(100vh - 56px);
-    overflow-y: auto;
-  }
-  .nav-section { margin-bottom: 1.25rem; }
-  .nav-title {
-    font-size: 10px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: .12em; color: var(--muted);
-    margin-bottom: .4rem; padding: 0 .5rem;
-  }
-  .nav-item {
-    display: block; padding: 6px .75rem; border-radius: 6px;
-    font-size: 13px; color: var(--muted); text-decoration: none;
-    transition: background .12s, color .12s; cursor: pointer;
-    border: none; background: none; width: 100%; text-align: left;
-    font-family: var(--sans);
-  }
-  .nav-item:hover { background: var(--surface2); color: var(--text); }
-  .nav-item.active { background: rgba(124,92,252,0.12); color: var(--accent2); }
-  .help-main { padding: 2.5rem 2.5rem 4rem; max-width: 760px; }
-  .help-page { display: none; }
-  .help-page.active { display: block; }
-  .page-title { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: .5rem; }
-  .page-desc { font-size: 14px; color: var(--muted); margin-bottom: 2rem; line-height: 1.6; }
-  .help-main h2 {
-    font-size: 15px; font-weight: 600; margin: 2rem 0 .75rem;
-    padding-bottom: .5rem; border-bottom: 1px solid var(--border);
-  }
-  .help-main h3 { font-size: 13px; font-weight: 600; margin: 1.25rem 0 .5rem; color: var(--accent2); }
-  .help-main p { font-size: 14px; line-height: 1.75; color: var(--text); margin-bottom: .75rem; }
-  .steps { display: flex; flex-direction: column; gap: .875rem; margin: 1rem 0; }
-  .step {
-    display: flex; gap: 1rem; background: var(--surface);
-    border: 1px solid var(--border); border-radius: 10px;
-    padding: .875rem 1.25rem; align-items: flex-start;
-  }
-  .step-num {
-    width: 26px; height: 26px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
-  }
-  .step-body { flex: 1; }
-  .step-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
-  .step-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
-  code {
-    font-family: var(--mono); font-size: 12px;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 4px; padding: 2px 6px; color: var(--accent2);
-  }
-  .help-main pre {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 8px; padding: 1rem 1.25rem;
-    font-family: var(--mono); font-size: 12px; line-height: 1.75;
-    overflow-x: auto; margin: .75rem 0 1rem; color: var(--text);
-  }
-  .api-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: .75rem 0 1.5rem; }
-  .api-table th {
-    text-align: left; font-size: 10px; text-transform: uppercase;
-    letter-spacing: .08em; color: var(--muted);
-    padding: 6px 10px; border-bottom: 1px solid var(--border);
-  }
-  .api-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
-  .api-table tr:last-child td { border-bottom: none; }
-  .api-table tr:hover td { background: var(--surface2); }
-  .fn-name { font-family: var(--mono); font-size: 11px; color: var(--accent2); white-space: nowrap; }
-  .fn-ret  { font-family: var(--mono); font-size: 11px; color: var(--green); }
-  .error-cards { display: flex; flex-direction: column; gap: .75rem; margin: 1rem 0; }
-  .error-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-left: 3px solid var(--red); border-radius: 8px; padding: .875rem 1.25rem;
-  }
-  .error-card.warn { border-left-color: var(--amber); }
-  .error-card.ok   { border-left-color: var(--green); }
-  .error-title { font-family: var(--mono); font-size: 11px; color: var(--red); margin-bottom: .4rem; font-weight: 700; }
-  .error-card.warn .error-title { color: var(--amber); }
-  .error-card.ok   .error-title { color: var(--green); }
-  .error-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
-  .error-body strong { color: var(--text); }
-  .tier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: .75rem 0 1.5rem; }
-  .tier-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-  .tier-badge { font-size: 10px; font-family: var(--mono); font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; display: inline-block; }
-  .t0 { background: rgba(34,211,160,0.15); color: var(--green); }
-  .t1 { background: rgba(124,92,252,0.15); color: var(--accent2); }
-  .t2 { background: rgba(245,158,11,0.15); color: var(--amber); }
-  .t3 { background: rgba(245,158,11,0.2);  color: #fb923c; }
-  .t4 { background: rgba(239,68,68,0.15);  color: var(--red); }
-  .tier-planets { font-size: 12px; color: var(--muted); line-height: 1.8; }
-  .hint {
-    background: rgba(124,92,252,0.08); border: 1px solid rgba(124,92,252,0.2);
-    border-radius: 8px; padding: .875rem 1rem; font-size: 13px;
-    color: var(--text); line-height: 1.6; margin: .75rem 0;
-  }
-  .hint::before { content: '💡 '; }
+/* HELP */
+.help-layout{display:grid;grid-template-columns:210px 1fr;min-height:calc(100vh - 56px);}
+.sidenav{padding:1.25rem .875rem;border-right:1px solid var(--border);position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+.nav-section{margin-bottom:1.1rem;}
+.nav-title{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:.35rem;padding:0 .5rem;}
+.nav-item{display:block;padding:5px .75rem;border-radius:6px;font-size:12px;color:var(--muted);text-decoration:none;transition:background .12s,color .12s;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:var(--sans);}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(124,92,252,.12);color:var(--accent2);}
+.help-main{padding:2rem 2.5rem 4rem;max-width:800px;}
+.help-page{display:none;}.help-page.active{display:block;}
+.page-title{font-size:22px;font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem;}
+.page-desc{font-size:13px;color:var(--muted);margin-bottom:1.75rem;line-height:1.6;}
+.help-main h2{font-size:14px;font-weight:600;margin:1.75rem 0 .65rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);}
+.help-main h3{font-size:12px;font-weight:600;margin:1.1rem 0 .4rem;color:var(--accent2);}
+.help-main p{font-size:13px;line-height:1.75;color:var(--text);margin-bottom:.65rem;}
+.steps{display:flex;flex-direction:column;gap:.75rem;margin:.875rem 0;}
+.step{display:flex;gap:.875rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.75rem 1.1rem;align-items:flex-start;}
+.step-num{width:24px;height:24px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;}
+.step-body{flex:1;}.step-title{font-size:12px;font-weight:600;margin-bottom:3px;}.step-desc{font-size:11px;color:var(--muted);line-height:1.6;}
+code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;color:var(--accent2);}
+.help-main pre{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.875rem 1.1rem;font-family:var(--mono);font-size:11px;line-height:1.75;overflow-x:auto;margin:.65rem 0 .875rem;color:var(--text);}
+.api-table,.fluid-table{width:100%;border-collapse:collapse;font-size:12px;margin:.65rem 0 1.25rem;}
+.api-table th,.fluid-table th{text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:5px 9px;border-bottom:1px solid var(--border);}
+.api-table td,.fluid-table td{padding:8px 9px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5;font-size:11px;}
+.api-table tr:last-child td,.fluid-table tr:last-child td{border-bottom:none;}
+.api-table tr:hover td,.fluid-table tr:hover td{background:var(--surface2);}
+.fn-name{font-family:var(--mono);font-size:10px;color:var(--accent2);white-space:nowrap;}
+.fn-ret{font-family:var(--mono);font-size:10px;color:var(--green);}
+.error-cards{display:flex;flex-direction:column;gap:.65rem;margin:.875rem 0;}
+.error-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:8px;padding:.75rem 1.1rem;}
+.error-card.warn{border-left-color:var(--amber);}.error-card.ok{border-left-color:var(--green);}.error-card.info{border-left-color:var(--blue);}
+.error-title{font-family:var(--mono);font-size:10px;color:var(--red);margin-bottom:.35rem;font-weight:700;}
+.error-card.warn .error-title{color:var(--amber);}.error-card.ok .error-title{color:var(--green);}.error-card.info .error-title{color:var(--blue);}
+.error-body{font-size:11px;color:var(--muted);line-height:1.6;}.error-body strong{color:var(--text);}
+.tier-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:7px;margin:.65rem 0 1.25rem;}
+.tier-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;}
+.tier-badge{font-size:9px;font-family:var(--mono);font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:5px;display:inline-block;}
+.t0{background:rgba(34,211,160,.15);color:var(--green);}.t1{background:rgba(124,92,252,.15);color:var(--accent2);}
+.t2{background:rgba(245,158,11,.15);color:var(--amber);}.t3{background:rgba(245,158,11,.2);color:#fb923c;}.t4{background:rgba(239,68,68,.15);color:var(--red);}
+.tier-planets{font-size:11px;color:var(--muted);line-height:1.8;}
+.hint{background:rgba(124,92,252,.08);border:1px solid rgba(124,92,252,.2);border-radius:8px;padding:.75rem .875rem;font-size:12px;color:var(--text);line-height:1.6;margin:.65rem 0;}
+.hint::before{content:'💡 ';}
+.warn-box{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:.75rem .875rem;font-size:12px;color:var(--text);line-height:1.6;margin:.65rem 0;}
+.warn-box::before{content:'⚠️ ';}
+.example-block{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem 1.1rem;margin:.65rem 0;}
+.example-title{font-size:11px;font-weight:600;color:var(--accent2);margin-bottom:.5rem;font-family:var(--mono);}
+.block-demo{display:flex;flex-direction:column;gap:4px;padding:8px;background:var(--bg);border-radius:6px;}
+.bd-block{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:5px;border:1px solid;font-size:11px;font-weight:600;}
 
 
-  /* ===== TOOLTIP ===== */
-  .field label { display: flex; align-items: center; gap: 5px; }
-  .tip-wrap { position: relative; display: inline-flex; }
-  .tip-btn {
-    width: 15px; height: 15px; border-radius: 50%;
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--muted); font-size: 9px; font-family: var(--mono);
-    font-weight: 700; cursor: pointer; display: flex;
-    align-items: center; justify-content: center;
-    flex-shrink: 0; transition: border-color .15s, color .15s;
-    line-height: 1;
-  }
-  .tip-btn:hover { border-color: var(--accent2); color: var(--accent2); }
-  .tip-box {
-    display: none; position: absolute; top: calc(100% + 6px); left: 50%;
-    transform: translateX(-50%); width: 220px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 8px; padding: 10px 12px;
-    font-size: 11px; font-family: var(--sans); color: var(--text);
-    line-height: 1.6; z-index: 200;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-    pointer-events: none;
-  }
-  .tip-box::before {
-    content: ''; position: absolute; bottom: 100%; left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-bottom-color: var(--border);
-  }
-  .tip-wrap:hover .tip-box,
-  .tip-btn:focus + .tip-box { display: block; }
+.v112-only{}.v111-only{}
+.hdr-select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:11px;padding:4px 8px;outline:none;cursor:pointer;transition:border-color .15s;height:28px;}
+.hdr-select:hover,.hdr-select:focus{border-color:var(--accent);}
+.hdr-select.ver-select{color:var(--green);}
+.hdr-select.lang-select{color:var(--accent2);}
+.hdr-label{font-size:10px;color:var(--muted);font-family:var(--mono);}
 
-  @media (max-width: 800px) {
-    .gen-layout { grid-template-columns: 1fr; }
-    .config-panel { border-right: none; border-bottom: 1px solid var(--border); }
-    .help-layout { grid-template-columns: 1fr; }
-    .sidenav { display: none; }
-    .help-main { padding: 1.5rem 1.25rem 3rem; }
-  }
+@media(max-width:900px){
+  .gen-layout,.vb-layout{grid-template-columns:1fr;}
+  .config-panel{border-right:none;border-bottom:1px solid var(--border);}
+  .vb-palette,.vb-canvas{border-right:none;border-bottom:1px solid var(--border);}
+  .help-layout{grid-template-columns:1fr;}.sidenav{display:none;}
+  .help-main{padding:1.25rem 1rem 3rem;}header h1{display:none;}
+}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">🚀</div>
   <h1>Cargo Rocket Script Generator</h1>
-  <span class="version-badge">Ad Astra + CC:Tweaked</span>
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('generator', this)">⚙️ ジェネレーター</button>
-    <button class="tab-btn" onclick="switchTab('help', this)">📖 HELP</button>
+  <span class="version-badge">Forge 1.20.1 · v1.2.2</span>
+  <div class="header-right">
+    <select class="hdr-select ver-select" id="verSelect" onchange="setVer(this.value)">
+      <option value="v122">v1.2.2</option>
+      <option value="v121">v1.2.1</option>
+    </select>
+    <select class="hdr-select lang-select" id="langSelect" onchange="setLang(this.value)">
+      <option value="en">EN</option>
+      <option value="ja">JA</option>
+    </select>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('generator',this)" data-i18n="tab_gen">⚙️ Generator</button>
+      <button class="tab-btn" onclick="switchTab('visual',this)" data-i18n="tab_vis">🧩 Visual</button>
+      <button class="tab-btn" onclick="switchTab('help',this)" data-i18n="tab_help">📖 HELP</button>
+    </div>
   </div>
 </header>
 
-<!-- ===== GENERATOR TAB ===== -->
+<!-- ===== GENERATOR ===== -->
 <div class="tab-page active" id="tab-generator">
   <div class="gen-layout">
     <div class="config-panel">
       <div class="section">
-        <div class="section-label">基本設定</div>
+        <div class="section-label" data-i18n="sec_basic">Basic Settings</div>
         <div class="field">
-          <label>ペリフェラル名 <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box">PCから見た発射台の方向名、またはデバイス名。<br><code>peripheral.getNames()</code> で確認できます。例: top, bottom, left</div></span></label>
-          <input type="text" id="padName" value="top" placeholder="top / bottom / cargo_rocket_launch_pad_0">
+          <label data-i18n="lbl_pad">Peripheral Name <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_pad">Direction or device name seen from the PC. Check with peripheral.getNames(). e.g. top, bottom, left</div></span></label>
+          <input type="text" id="padName" value="top" data-i18n-placeholder="ph_pad">
         </div>
         <div class="field">
-          <label>発射地点 (現在地) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box">ロケットが今いる星。発射地点と目的地の高い方のティアが必要ティアになります。</div></span></label>
+          <label data-i18n="lbl_origin">Launch Origin <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_origin">The planet the rocket is currently on. Required tier = max(origin tier, destination tier).</div></span></label>
           <select id="origin" onchange="calcTier()">
             <option value="minecraft:overworld">🌍 minecraft:overworld</option>
-            <option value="ad_astra:earth_orbit">🌍 ad_astra:earth_orbit (地球の衛星軌道)</option>
+            <option value="ad_astra:earth_orbit" data-i18n-suffix="orbit_earth">🌍 ad_astra:earth_orbit</option>
             <option value="ad_astra:moon">🌕 ad_astra:moon</option>
-            <option value="ad_astra:moon_orbit">🌕 ad_astra:moon_orbit (月の衛星軌道)</option>
+            <option value="ad_astra:moon_orbit" data-i18n-suffix="orbit_moon">🌕 ad_astra:moon_orbit</option>
             <option value="ad_astra:mars">🔴 ad_astra:mars</option>
-            <option value="ad_astra:mars_orbit">🔴 ad_astra:mars_orbit (火星の衛星軌道)</option>
+            <option value="ad_astra:mars_orbit" data-i18n-suffix="orbit_mars">🔴 ad_astra:mars_orbit</option>
             <option value="ad_astra:mercury">⚫ ad_astra:mercury</option>
-            <option value="ad_astra:mercury_orbit">⚫ ad_astra:mercury_orbit (水星の衛星軌道)</option>
+            <option value="ad_astra:mercury_orbit" data-i18n-suffix="orbit_mercury">⚫ ad_astra:mercury_orbit</option>
             <option value="ad_astra:venus">🟡 ad_astra:venus</option>
-            <option value="ad_astra:venus_orbit">🟡 ad_astra:venus_orbit (金星の衛星軌道)</option>
+            <option value="ad_astra:venus_orbit" data-i18n-suffix="orbit_venus">🟡 ad_astra:venus_orbit</option>
             <option value="ad_astra:glacio">🧊 ad_astra:glacio</option>
-            <option value="ad_astra:glacio_orbit">🧊 ad_astra:glacio_orbit (グラシオの衛星軌道)</option>
+            <option value="ad_astra:glacio_orbit" data-i18n-suffix="orbit_glacio">🧊 ad_astra:glacio_orbit</option>
           </select>
         </div>
         <div class="field">
-          <label>目的地 (planet ID) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box">ロケットを飛ばしたい惑星。<code>getValidDestinations()</code> で現在行ける惑星を確認できます。</div></span></label>
+          <label data-i18n="lbl_dest">Destination <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_dest">Target planet.</div></span></label>
           <select id="planet" onchange="calcTier()">
             <option value="minecraft:overworld">🌍 minecraft:overworld — Tier 0</option>
-            <option value="ad_astra:earth_orbit">🌍 ad_astra:earth_orbit — Tier 1 (地球の衛星軌道)</option>
+            <option value="ad_astra:earth_orbit" data-i18n-suffix="orbit_earth">🌍 ad_astra:earth_orbit — Tier 1</option>
             <option value="ad_astra:moon">🌕 ad_astra:moon — Tier 1</option>
-            <option value="ad_astra:moon_orbit">🌕 ad_astra:moon_orbit — Tier 1 (月の衛星軌道)</option>
+            <option value="ad_astra:moon_orbit" data-i18n-suffix="orbit_moon">🌕 ad_astra:moon_orbit — Tier 1</option>
             <option value="ad_astra:mars">🔴 ad_astra:mars — Tier 2</option>
-            <option value="ad_astra:mars_orbit">🔴 ad_astra:mars_orbit — Tier 2 (火星の衛星軌道)</option>
+            <option value="ad_astra:mars_orbit" data-i18n-suffix="orbit_mars">🔴 ad_astra:mars_orbit — Tier 2</option>
             <option value="ad_astra:mercury">⚫ ad_astra:mercury — Tier 3</option>
-            <option value="ad_astra:mercury_orbit">⚫ ad_astra:mercury_orbit — Tier 3 (水星の衛星軌道)</option>
+            <option value="ad_astra:mercury_orbit" data-i18n-suffix="orbit_mercury">⚫ ad_astra:mercury_orbit — Tier 3</option>
             <option value="ad_astra:venus">🟡 ad_astra:venus — Tier 3</option>
-            <option value="ad_astra:venus_orbit">🟡 ad_astra:venus_orbit — Tier 3 (金星の衛星軌道)</option>
+            <option value="ad_astra:venus_orbit" data-i18n-suffix="orbit_venus">🟡 ad_astra:venus_orbit — Tier 3</option>
             <option value="ad_astra:glacio">🧊 ad_astra:glacio — Tier 4</option>
-            <option value="ad_astra:glacio_orbit">🧊 ad_astra:glacio_orbit — Tier 4 (グラシオの衛星軌道)</option>
+            <option value="ad_astra:glacio_orbit" data-i18n-suffix="orbit_glacio">🧊 ad_astra:glacio_orbit — Tier 4</option>
           </select>
         </div>
-        <div id="tierResult" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:12px;margin-bottom:.875rem;">
-          <span style="color:var(--muted)">必要ロケットティア：</span>
-          <span id="tierVal" style="font-size:16px;font-weight:700;"></span>
-          <span id="tierNote" style="color:var(--muted);margin-left:8px;font-size:11px"></span>
+        <div id="tierResult" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:9px 11px;font-family:var(--mono);font-size:11px;margin-bottom:.75rem;">
+          <span style="color:var(--muted)" data-i18n="tier_label">Required Rocket Tier: </span>
+          <span id="tierVal" style="font-size:15px;font-weight:700;"></span>
+          <span id="tierNote" style="color:var(--muted);margin-left:8px;font-size:10px"></span>
         </div>
         <div class="row2">
           <div class="field">
-            <label>エネルギーチェック間隔 (秒) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box">エネルギーが足りない間、何秒ごとに再チェックするか。小さいほど頻繁に確認します。</div></span></label>
+            <label data-i18n="lbl_interval">Energy Interval (sec) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_interval">How often to recheck energy while waiting.</div></span></label>
             <input type="number" id="energyInterval" value="5" min="1" max="60">
           </div>
           <div class="field">
-            <label>帰還待機時間 (秒) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box">発射後、ロケットが帰還するまで何秒待つか。目的地が遠いほど長く設定してください。</div></span></label>
+            <label data-i18n="lbl_return">Return Wait (sec) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_return">How long to wait for rocket to return after launch.</div></span></label>
             <input type="number" id="returnWait" value="30" min="5" max="600">
           </div>
         </div>
+        <div class="field v112-only">
+          <label data-i18n="lbl_fuelcheck">Fuel Check <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_fuelcheck">Check fuel before launch. Supply via pipe to BOTTOM face.</div></span></label>
+          <select id="fuelCheck">
+            <option value="warn" data-i18n="fuel_warn">Warn if low</option>
+            <option value="wait" data-i18n="fuel_wait">Wait until full</option>
+            <option value="none" data-i18n="fuel_none">Disabled</option>
+          </select>
+        </div>
+        <div class="field v112-only">
+          <label data-i18n="lbl_minfuel">Min Fuel (mB) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_minfuel">Min fuel needed before launch. Default 3000 mB = 3 buckets.</div></span></label>
+          <input type="number" id="minFuel" value="3000" min="0">
+        </div>
+        <div class="field v112-only">
+          <label data-i18n="lbl_cargocheck">Cargo Fluid Check <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_cargocheck">Check cargo fluid after return. Supply/drain via TOP or SIDE face pipes.</div></span></label>
+          <select id="cargoCheck">
+            <option value="log" data-i18n="cargo_log">Log type and amount</option>
+            <option value="wait_fill" data-i18n="cargo_wait_fill">Wait until full</option>
+            <option value="wait_empty" data-i18n="cargo_wait_empty">Wait until empty</option>
+            <option value="none" data-i18n="cargo_none">Disabled</option>
+          </select>
+        </div>
+        <div class="field v112-only">
+          <label data-i18n="lbl_cargothreshold">Cargo Threshold (mB) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_cargothreshold">Target mB to wait for. 0 = empty, blank = full tank.</div></span></label>
+          <input type="number" id="cargoThreshold" value="0" min="0">
+        </div>
       </div>
       <div class="section">
-        <div class="section-label">積み込み (発射台 → ロケット) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box">発射前にアイテムをロケットへ移動します。発射台スロット1〜9はホッパー用インプットなので、10番以降を指定してください。</div></span></div>
-        <div class="slot-list" id="loadSlots"></div>
-        <button class="add-btn" onclick="addLoad()">+ スロット追加</button>
+        <div class="section-label" data-i18n="sec_transfer">Transfer Mode <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_transfer">Simple: bulk transfer. Manual: slot-by-slot.</div></span></div>
+        <div class="mode-toggle">
+          <button class="mode-btn active v112-only" id="btn-simple" onclick="setMode('simple',this)" data-i18n="mode_simple">⚡ Simple</button>
+          <button class="mode-btn" onclick="setMode('manual',this)" data-i18n="mode_manual">🔧 Manual</button>
+        </div>
+        <div class="mode-panel active" id="mode-simple">
+          <div class="field">
+            <label data-i18n="lbl_loadfilter">Load Filter <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_loadfilter">Item ID filter for loading. Blank = all items.</div></span></label>
+            <input type="text" id="loadFilter" data-i18n-placeholder="ph_loadfilter">
+          </div>
+          <div class="field">
+            <label data-i18n="lbl_unloadfilter">Unload Filter <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_unloadfilter">Item ID filter for unloading. Blank = all items.</div></span></label>
+            <input type="text" id="unloadFilter" data-i18n-placeholder="ph_unloadfilter">
+          </div>
+        </div>
+        <div class="mode-panel" id="mode-manual">
+          <div style="margin-bottom:.65rem">
+            <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:5px;" data-i18n="manual_load">LOAD (pad → rocket)</div>
+            <div class="slot-list" id="loadSlots"></div>
+            <button class="add-btn" onclick="addLoad()" data-i18n="btn_addslot">+ Add Slot</button>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:5px;" data-i18n="manual_unload">UNLOAD (rocket → pad)</div>
+            <div class="slot-list" id="unloadSlots"></div>
+            <button class="add-btn" onclick="addUnload()" data-i18n="btn_addslot">+ Add Slot</button>
+          </div>
+        </div>
       </div>
-      <div class="section">
-        <div class="section-label">降ろし (ロケット → 発射台) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box">帰還後にロケットのアイテムを発射台へ移動します。積み込みと逆のスロット番号を指定するのが一般的です。</div></span></div>
-        <div class="slot-list" id="unloadSlots"></div>
-        <button class="add-btn" onclick="addUnload()">+ スロット追加</button>
-      </div>
-      <button class="gen-btn" onclick="generate()">⚡ スクリプト生成</button>
+      <button class="gen-btn" onclick="generate()" data-i18n="btn_generate">⚡ Generate Script</button>
     </div>
-
     <div class="output-panel">
       <div class="output-header">
-        <span class="output-title">// output.lua</span>
+        <span class="output-title">// startup.lua</span>
         <div class="output-actions">
-          <button class="icon-btn" id="copyBtn" onclick="copyCode()">📋 コピー</button>
-          <button class="icon-btn" onclick="downloadCode()">💾 ダウンロード</button>
+          <button class="icon-btn" id="copyBtn" onclick="copyCode()" data-i18n="btn_copy">📋 Copy</button>
+          <button class="icon-btn" onclick="downloadCode()" data-i18n="btn_dl">💾 Download</button>
         </div>
       </div>
       <div class="stats" id="stats" style="display:none">
-        <div class="stat-card"><div class="val" id="statLines">0</div><div class="lbl">行数</div></div>
-        <div class="stat-card"><div class="val" id="statLoad">0</div><div class="lbl">積み込みスロット</div></div>
-        <div class="stat-card"><div class="val" id="statUnload">0</div><div class="lbl">降ろしスロット</div></div>
+        <div class="stat-card"><div class="val" id="statLines">0</div><div class="lbl" data-i18n="stat_lines">Lines</div></div>
+        <div class="stat-card"><div class="val" id="statMode">—</div><div class="lbl" data-i18n="stat_mode">Mode</div></div>
+        <div class="stat-card"><div class="val" id="statFuel">—</div><div class="lbl" data-i18n="stat_fuel">Fuel</div></div>
       </div>
       <div class="code-area">
-        <div class="placeholder" id="placeholder">
-          <div class="icon">📄</div>
-          <p>設定を入力してスクリプトを生成してください</p>
-        </div>
+        <div class="placeholder" id="placeholder"><div class="icon">📄</div><p data-i18n="placeholder_text">Configure settings and generate your script</p></div>
         <pre id="codeBlock" style="display:none"></pre>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===== HELP TAB ===== -->
+<!-- ===== VISUAL BUILDER ===== -->
+<div class="tab-page" id="tab-visual">
+  <div class="vb-layout">
+    <div class="vb-palette">
+      <div class="palette-section">
+        <div class="palette-title" data-i18n="pal_control">Control Flow</div>
+        <div class="palette-block pb-loop" draggable="true" data-type="loop">🔁 <span data-i18n="blk_loop">Loop Forever</span></div>
+      </div>
+      <div class="palette-section">
+        <div class="palette-title" data-i18n="pal_check">Checks</div>
+        <div class="palette-block pb-energy" draggable="true" data-type="energy">⚡ <span data-i18n="blk_energy">Wait for Energy</span></div>
+        <div class="palette-block pb-fuel v112-only" draggable="true" data-type="fuel">🛢️ <span data-i18n="blk_fuel">Fuel Check</span></div>
+        <div class="palette-block pb-check" draggable="true" data-type="rocketcheck">🚀 <span data-i18n="blk_rocketcheck">Check Rocket</span></div>
+        <div class="palette-block pb-cargo v112-only" draggable="true" data-type="cargo">🧪 <span data-i18n="blk_cargo">Cargo Fluid</span></div>
+      </div>
+      <div class="palette-section">
+        <div class="palette-title" data-i18n="pal_action">Actions</div>
+        <div class="palette-block pb-load v112-only" draggable="true" data-type="load">📦 <span data-i18n="blk_load">Load Items</span></div>
+        <div class="palette-block pb-launch" draggable="true" data-type="launch">🚀 <span data-i18n="blk_launch">Launch</span></div>
+        <div class="palette-block pb-wait" draggable="true" data-type="returnwait">⏳ <span data-i18n="blk_returnwait">Wait Return</span></div>
+        <div class="palette-block pb-unload v112-only" draggable="true" data-type="unload">📤 <span data-i18n="blk_unload">Unload Items</span></div>
+        <div class="palette-block pb-log" draggable="true" data-type="log">📝 <span data-i18n="blk_log">Print Message</span></div>
+      </div>
+    </div>
+    <div class="vb-canvas">
+      <div class="canvas-header">
+        <span class="canvas-title" data-i18n="canvas_title">// Drag blocks here to build your script</span>
+        <div class="canvas-actions">
+          <button class="icon-btn" onclick="loadPreset()" data-i18n="btn_preset">📋 Load Preset</button>
+          <button class="icon-btn" onclick="clearCanvas()" data-i18n="btn_clear">🗑 Clear</button>
+        </div>
+      </div>
+      <div class="canvas-area" id="canvasArea">
+        <div class="canvas-empty" id="canvasEmpty">
+          <div class="icon">🧩</div>
+          <span data-i18n="canvas_empty">Drag blocks from the left panel</span>
+        </div>
+      </div>
+    </div>
+    <div class="vb-output">
+      <div class="output-header">
+        <span class="output-title">// visual_output.lua</span>
+        <div class="output-actions">
+          <button class="icon-btn" id="vbCopyBtn" onclick="vbCopyCode()" data-i18n="btn_copy">📋 Copy</button>
+          <button class="icon-btn" onclick="vbDownloadCode()" data-i18n="btn_dl">💾 Download</button>
+        </div>
+      </div>
+      <div class="code-area">
+        <div class="placeholder" id="vbPlaceholder"><div class="icon">📄</div><p data-i18n="vb_placeholder">Add blocks and generate script</p></div>
+        <pre id="vbCodeBlock" style="display:none"></pre>
+      </div>
+      <button class="vb-gen-btn" onclick="vbGenerate()" data-i18n="btn_generate">⚡ Generate Script</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HELP ===== -->
 <div class="tab-page" id="tab-help">
   <div class="help-layout">
     <nav class="sidenav">
       <div class="nav-section">
-        <div class="nav-title">はじめに</div>
-        <button class="nav-item active" onclick="showHelp('setup', this)">セットアップ手順</button>
+        <div class="nav-title" data-i18n="nav_start">Getting Started</div>
+        <button class="nav-item active" onclick="showHelp('setup',this)" data-i18n="nav_setup">Setup Guide</button>
+        <button class="nav-item" onclick="showHelp('fuel',this)" data-i18n="nav_fuel">Fuel Setup</button>
+        <button class="nav-item" onclick="showHelp('fluid',this)" data-i18n="nav_fluid">Fluid Transport</button>
       </div>
       <div class="nav-section">
-        <div class="nav-title">使い方</div>
-        <button class="nav-item" onclick="showHelp('script', this)">スクリプトの使い方</button>
-        <button class="nav-item" onclick="showHelp('tiers', this)">ロケットティア表</button>
+        <div class="nav-title" data-i18n="nav_usage">Usage</div>
+        <button class="nav-item" onclick="showHelp('script',this)" data-i18n="nav_script">Script Usage</button>
+        <button class="nav-item" onclick="showHelp('visual',this)" data-i18n="nav_visual">Visual Builder</button>
+        <button class="nav-item" onclick="showHelp('roundtrip',this)" data-i18n="nav_roundtrip">Round Trip</button>
+        <button class="nav-item" onclick="showHelp('tiers',this)" data-i18n="nav_tiers">Tier Table</button>
       </div>
       <div class="nav-section">
-        <div class="nav-title">リファレンス</div>
-        <button class="nav-item" onclick="showHelp('api', this)">Lua API 一覧</button>
+        <div class="nav-title" data-i18n="nav_ref">Reference</div>
+        <button class="nav-item" onclick="showHelp('api',this)" data-i18n="nav_api">Lua API</button>
+        <button class="nav-item" onclick="showHelp('examples',this)" data-i18n="nav_examples">Script Examples</button>
       </div>
       <div class="nav-section">
-        <div class="nav-title">サポート</div>
-        <button class="nav-item" onclick="showHelp('trouble', this)">トラブルシューティング</button>
+        <div class="nav-title" data-i18n="nav_support">Support</div>
+        <button class="nav-item" onclick="showHelp('trouble',this)" data-i18n="nav_trouble">Troubleshooting</button>
       </div>
     </nav>
-
-    <main class="help-main">
-
-      <!-- セットアップ -->
-      <div class="help-page active" id="help-setup">
-        <div class="page-title">セットアップ手順</div>
-        <p class="page-desc">Ad Astra Cargo Rockets と CC:Tweaked を使って自動化を始めるための手順です。</p>
-        <h2>必要なMOD</h2>
-        <div class="steps">
-          <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Ad Astra</div><div class="step-desc">宇宙MOD本体。ロケットや惑星を追加します。Fabric 1.20.1 対応版を導入してください。</div></div></div>
-          <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Ad Astra Cargo Rockets</div><div class="step-desc">CC:Tweaked でロケットを自動制御できるようにするアドオン。CurseForge から導入。</div></div></div>
-          <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">CC:Tweaked</div><div class="step-desc">ComputerCraft の後継MOD。コンピュータブロックと Lua スクリプトを追加します。</div></div></div>
-          <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Fabric API + F-Tech: Core</div><div class="step-desc">Cargo Rockets の動作に必要な依存MODです。</div></div></div>
-        </div>
-        <h2>ブロックの設置方法</h2>
-        <div class="steps">
-          <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Cargo Rocket Launch Pad を設置</div><div class="step-desc">発射台を設置します。中央ブロックと外周ブロックで構成されています。</div></div></div>
-          <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">PCを発射台の中央ブロックに隣接させる</div><div class="step-desc">⚠️ 外周ブロックではなく中央ブロックに隣接させてください。外周だとAPIが使えません。Peripheral Hub 経由でも可。</div></div></div>
-          <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">接続確認</div><div class="step-desc">PCを開いて <code>lua</code> と入力後、以下を実行して発射台が見つかることを確認します。</div></div></div>
-        </div>
-        <pre><span class="fn">peripheral</span>.getNames()
-<span class="cmt">-- 例: { "top" } と表示されればOK</span>
-
-launch_pad = <span class="fn">peripheral</span>.wrap(<span class="str">"top"</span>)
-launch_pad.isRocketPresent()
-<span class="cmt">-- true / false が返ればAPI接続成功</span></pre>
-        <div class="hint">PCと発射台が離れている場合はPeripheral Hub を使って有線接続できます。その場合もHubは中央ブロックに隣接させてください。</div>
-      </div>
-
-      <!-- スクリプトの使い方 -->
-      <div class="help-page" id="help-script">
-        <div class="page-title">スクリプトの使い方</div>
-        <p class="page-desc">生成したLuaスクリプトをComputerCraftのPCに保存して実行する方法です。</p>
-        <h2>ファイルの保存方法</h2>
-        <h3>方法 A — PC内で直接書く</h3>
-        <p>PCを開いてシェルから以下を実行します：</p>
-        <pre>edit startup.lua</pre>
-        <p>エディタが開くので、ジェネレーターでコピーしたコードを貼り付けて <code>Ctrl+S</code> で保存、<code>Ctrl+E</code> で終了します。</p>
-        <h3>方法 B — pastebin を使う（推奨）</h3>
-        <p>pastebin.com にコードを貼り付けてIDを取得し：</p>
-        <pre>pastebin get &lt;ID&gt; startup.lua</pre>
-        <h2>実行方法</h2>
-        <div class="steps">
-          <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">手動実行</div><div class="step-desc">PCシェルで <code>startup</code> と入力して Enter。</div></div></div>
-          <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">自動起動 (startup.lua)</div><div class="step-desc">ファイル名を <code>startup.lua</code> にするとPC起動時に自動実行されます。再起動は <code>reboot</code> コマンドで。</div></div></div>
-          <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">停止方法</div><div class="step-desc"><code>Ctrl+T</code> でプログラムを強制終了できます。</div></div></div>
-        </div>
-        <div class="hint">スロット番号は1始まりです。発射台スロット1〜9はインプットスロット（ホッパー等が入れる側）なので、スクリプトで積み込む際は10以降を使うと混乱しにくいです。</div>
-      </div>
-
-      <!-- ティア表 -->
-      <div class="help-page" id="help-tiers">
-        <div class="page-title">ロケットティア表</div>
-        <p class="page-desc">目的地に応じて必要なロケットのティアが異なります。発射地点と目的地の高い方のティアが必要です。</p>
-        <h2>惑星ごとの必要ティア</h2>
-        <div class="tier-grid">
-          <div class="tier-card"><span class="tier-badge t0">Tier 0</span><div class="tier-planets">🌍 overworld</div></div>
-          <div class="tier-card"><span class="tier-badge t1">Tier 1</span><div class="tier-planets">🌍 earth_orbit<br>🌕 moon<br>🌕 moon_orbit</div></div>
-          <div class="tier-card"><span class="tier-badge t2">Tier 2</span><div class="tier-planets">🔴 mars<br>🔴 mars_orbit</div></div>
-          <div class="tier-card"><span class="tier-badge t3">Tier 3</span><div class="tier-planets">⚫ mercury<br>⚫ mercury_orbit<br>🟡 venus<br>🟡 venus_orbit</div></div>
-          <div class="tier-card"><span class="tier-badge t4">Tier 4</span><div class="tier-planets">🧊 glacio<br>🧊 glacio_orbit</div></div>
-        </div>
-        <h2>ティア計算のルール</h2>
-        <p>必要ティア = max(発射地点のティア, 目的地のティア)</p>
-        <pre><span class="cmt">-- 例1: 地球 → 火星  max(0, 2) = Tier 2</span>
-<span class="cmt">-- 例2: 火星 → 地球  max(2, 0) = Tier 2</span>
-<span class="cmt">-- 例3: 月  → 地球軌道  max(1, 1) = Tier 1</span></pre>
-        <div class="hint">ジェネレーターの「発射地点」と「目的地」を選ぶと必要ティアが自動計算されます。</div>
-      </div>
-
-      <!-- API一覧 -->
-      <div class="help-page" id="help-api">
-        <div class="page-title">Lua API 一覧</div>
-        <p class="page-desc"><code>launch_pad = peripheral.wrap("top")</code> で接続後に使用できる全コマンドです。</p>
-        <h2>発射・状態確認</h2>
-        <table class="api-table">
-          <thead><tr><th>関数</th><th>戻り値</th><th>説明</th></tr></thead>
-          <tbody>
-            <tr><td class="fn-name">launch(planet)</td><td class="fn-ret">—</td><td>指定した惑星へロケットを発射。失敗するとエラーを投げる。</td></tr>
-            <tr><td class="fn-name">isRocketPresent()</td><td class="fn-ret">boolean</td><td>発射台にロケットがあれば <code>true</code>。</td></tr>
-            <tr><td class="fn-name">getValidDestinations()</td><td class="fn-ret">table</td><td>行ける惑星と必要ティアの一覧。例: <code>{ ["ad_astra:moon"] = 1 }</code></td></tr>
-          </tbody>
-        </table>
-        <h2>エネルギー</h2>
-        <table class="api-table">
-          <thead><tr><th>関数</th><th>戻り値</th><th>説明</th></tr></thead>
-          <tbody>
-            <tr><td class="fn-name">getEnergy()</td><td class="fn-ret">long</td><td>現在の蓄積エネルギー量 (RF)。</td></tr>
-            <tr><td class="fn-name">getMaxEnergy()</td><td class="fn-ret">long</td><td>最大エネルギー容量 (RF)。</td></tr>
-            <tr><td class="fn-name">getEnergyRequiredForLaunch()</td><td class="fn-ret">int</td><td>発射に必要なエネルギー量。通常 500,000 RF。</td></tr>
-          </tbody>
-        </table>
-        <h2>インベントリ操作</h2>
-        <table class="api-table">
-          <thead><tr><th>関数</th><th>戻り値</th><th>説明</th></tr></thead>
-          <tbody>
-            <tr><td class="fn-name">listRocketInventory()</td><td class="fn-ret">table|nil</td><td>ロケット内のアイテム一覧。ロケットがなければ <code>nil</code>。</td></tr>
-            <tr><td class="fn-name">listLaunchPadInventory()</td><td class="fn-ret">table</td><td>発射台インベントリのアイテム一覧。</td></tr>
-            <tr><td class="fn-name">moveItemsFromLaunchPadToRocket(padSlot, rocketSlot)</td><td class="fn-ret">—</td><td>発射台 → ロケットへアイテムを移動。</td></tr>
-            <tr><td class="fn-name">moveItemsFromRocketToLaunchPad(rocketSlot, padSlot)</td><td class="fn-ret">—</td><td>ロケット → 発射台へアイテムを移動。</td></tr>
-            <tr><td class="fn-name">listLaunchPadInputSlotIndexes()</td><td class="fn-ret">int[]</td><td>ホッパー等が挿入できるインプットスロット番号一覧。</td></tr>
-            <tr><td class="fn-name">listLaunchPadOutputSlotIndexes()</td><td class="fn-ret">int[]</td><td>ホッパー等が取り出せるアウトプットスロット番号一覧。</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- トラブルシューティング -->
-      <div class="help-page" id="help-trouble">
-        <div class="page-title">トラブルシューティング</div>
-        <p class="page-desc">よくあるエラーと解決方法をまとめました。</p>
-        <h2>接続エラー</h2>
-        <div class="error-cards">
-          <div class="error-card"><div class="error-title">attempt to index global 'launch_pad' (a nil value)</div><div class="error-body"><strong>原因：</strong> peripheral.wrap() が未実行、またはPC再起動で変数がリセットされた。<br><strong>解決：</strong> スクリプト先頭に <code>local launch_pad = peripheral.wrap("top")</code> を必ず記述。</div></div>
-          <div class="error-card warn"><div class="error-title">peripheral.getNames() が { "bottom" } しか返らない</div><div class="error-body"><strong>原因：</strong> PCがモデムやHub に接続しているが発射台が認識されていない。<br><strong>解決：</strong> <code>peripheral.getType("bottom")</code> で種類を確認。HubなどにPCを繋げ直す。</div></div>
-          <div class="error-card"><div class="error-title">attempt to call field 'isRocketPresent' (a nil value)</div><div class="error-body"><strong>原因：</strong> PCが発射台の外周ブロックに接続している。外周ではAPIが使えない。<br><strong>解決：</strong> PCまたはHubを発射台の中央ブロックに隣接するよう設置し直す。</div></div>
-        </div>
-        <h2>発射エラー</h2>
-        <div class="error-cards">
-          <div class="error-card"><div class="error-title">No rocket found</div><div class="error-body"><strong>原因：</strong> 発射台にロケットが設置されていない。<br><strong>解決：</strong> ロケットを発射台の中央ブロックに設置する。</div></div>
-          <div class="error-card"><div class="error-title">Not enough energy to launch</div><div class="error-body"><strong>原因：</strong> エネルギー不足（通常 500,000 RF 必要）。<br><strong>解決：</strong> 発電機でエネルギーを供給。<code>launch_pad.getEnergy()</code> で現在量を確認。</div></div>
-          <div class="error-card"><div class="error-title">&lt;planet&gt; is too high of a tier for this rocket</div><div class="error-body"><strong>原因：</strong> ロケットのティアが目的地に対して不足している。<br><strong>解決：</strong> より高ティアのロケットを使用する。ジェネレーターのティア計算で確認。</div></div>
-          <div class="error-card warn"><div class="error-title">&lt;planet&gt; is not a valid planet</div><div class="error-body"><strong>原因：</strong> 惑星IDが間違っている（タイポなど）。<br><strong>解決：</strong> <code>launch_pad.getValidDestinations()</code> で正しいIDを確認。</div></div>
-        </div>
-        <h2>よくある質問</h2>
-        <div class="error-cards">
-          <div class="error-card ok"><div class="error-title">スロット1〜9にアイテムを入れたのにロケットに積まれない</div><div class="error-body">スロット1〜9は発射台のインプットスロットです。積み込みには10番以降のスロットを使ってください。</div></div>
-          <div class="error-card ok"><div class="error-title">スクリプトを止めたい</div><div class="error-body">PCを開いた状態で <code>Ctrl+T</code> を押すとプログラムを強制終了できます。</div></div>
-          <div class="error-card ok"><div class="error-title">再起動したらスクリプトが動かない</div><div class="error-body">ファイル名を <code>startup.lua</code> にすることでPC起動時に自動実行されます。</div></div>
-        </div>
-      </div>
-
-    </main>
+    <main class="help-main" id="helpMain"></main>
   </div>
 </div>
 
 <script>
-// ===== TAB SWITCHING =====
-function switchTab(id, btn) {
-  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  btn.classList.add('active');
+// ============================================================
+// TRANSLATIONS
+// ============================================================
+const T={
+en:{
+  tab_gen:"⚙️ Generator",tab_vis:"🧩 Visual",tab_help:"📖 HELP",
+  sec_basic:"Basic Settings",sec_transfer:"Transfer Mode",
+  lbl_pad:"Peripheral Name",tip_pad:"Direction or device name seen from the PC. Check with peripheral.getNames(). e.g. top, bottom, left",ph_pad:"top / bottom / cargo_rocket_launch_pad_0",
+  lbl_origin:"Launch Origin",tip_origin:"The planet the rocket is currently on. Required tier = max(origin tier, destination tier).",
+  lbl_dest:"Destination",tip_dest:"Target planet. Check with launch_pad.getValidDestinations().",
+  tier_label:"Required Rocket Tier: ",tier_notes:["(any rocket)","(Tier 1+)","(Tier 2+)","(Tier 3+)","(Tier 4+)"],
+  lbl_interval:"Energy Interval (sec)",tip_interval:"How often to recheck energy while waiting for a full charge.",
+  lbl_return:"Return Wait (sec)",tip_return:"How long to wait after launch for the rocket to return.",
+  lbl_fuelcheck:"Fuel Check",tip_fuelcheck:"Check fuel before launch. Supply via pipe to BOTTOM face of launchpad.",
+  fuel_warn:"Warn if low",fuel_wait:"Wait until full",fuel_none:"Disabled",
+  lbl_minfuel:"Min Fuel (mB)",tip_minfuel:"Min fuel needed before launch. Default 3000 mB = 3 buckets.",
+  lbl_cargocheck:"Cargo Fluid Check",tip_cargocheck:"Check cargo fluid after return. Supply/drain via TOP or SIDE face pipes.",
+  cargo_log:"Log type and amount",cargo_wait_fill:"Wait until full",cargo_wait_empty:"Wait until empty",cargo_none:"Disabled",
+  lbl_cargothreshold:"Cargo Threshold (mB)",tip_cargothreshold:"Target mB to wait for. 0 = empty, blank = full tank.",
+  mode_simple:"⚡ Simple",mode_manual:"🔧 Manual",
+  tip_transfer:"Simple: use loadAllItems/unloadAllItems. Manual: specify each slot.",
+  lbl_loadfilter:"Load Filter",tip_loadfilter:"Item ID filter. Blank = all items.",ph_loadfilter:"e.g. minecraft:cobblestone",
+  lbl_unloadfilter:"Unload Filter",tip_unloadfilter:"Item ID filter for unloading. Blank = all.",ph_unloadfilter:"e.g. minecraft:iron_ore",
+  manual_load:"LOAD (pad → rocket)",manual_unload:"UNLOAD (rocket → pad)",
+  btn_addslot:"+ Add Slot",btn_generate:"⚡ Generate Script",btn_copy:"📋 Copy",btn_dl:"💾 Download",btn_copied:"✅ Copied!",
+  stat_lines:"Lines",stat_mode:"Mode",stat_fuel:"Fuel",placeholder_text:"Configure settings and generate your script",
+  slot_pad:"pad",slot_rocket:"rocket",
+  orbit_earth:"(Earth Orbit)",orbit_moon:"(Moon Orbit)",orbit_mars:"(Mars Orbit)",orbit_mercury:"(Mercury Orbit)",orbit_venus:"(Venus Orbit)",orbit_glacio:"(Glacio Orbit)",
+  // Visual Builder
+  pal_control:"Control Flow",pal_check:"Checks",pal_action:"Actions",
+  blk_loop:"Loop Forever",blk_energy:"Wait for Energy",blk_fuel:"Fuel Check",blk_rocketcheck:"Check Rocket",blk_cargo:"Cargo Fluid",
+  blk_load:"Load Items",blk_launch:"Launch",blk_returnwait:"Wait Return",blk_unload:"Unload Items",blk_log:"Print Message",
+  canvas_title:"// Drag blocks here to build your script",canvas_empty:"Drag blocks from the left panel",
+  btn_preset:"📋 Load Preset",btn_clear:"🗑 Clear",vb_placeholder:"Add blocks and generate script",
+  // Block params
+  p_pad:"Peripheral",p_planet:"Planet",p_interval:"Interval(s)",p_wait:"Wait(s)",p_minfuel:"Min Fuel(mB)",p_filter:"Filter",p_slot_pad:"Pad Slot",p_slot_rocket:"Rocket Slot",p_msg:"Message",p_cargo_mode:"Mode",
+  p_fuel_mode:"Mode",fuelmode_warn:"warn",fuelmode_wait:"wait",cargomode_log:"log",cargomode_fill:"wait_fill",cargomode_empty:"wait_empty",
+  // Help nav
+  nav_start:"Getting Started",nav_setup:"Setup Guide",nav_fuel:"Fuel Setup",nav_fluid:"Fluid Transport",
+  nav_usage:"Usage",nav_script:"Script Usage",nav_visual:"Visual Builder",nav_roundtrip:"Round Trip",nav_tiers:"Tier Table",
+  nav_ref:"Reference",nav_api:"Lua API",nav_examples:"Script Examples",nav_support:"Support",nav_trouble:"Troubleshooting",
+},
+ja:{
+  tab_gen:"⚙️ ジェネレーター",tab_vis:"🧩 ビジュアル",tab_help:"📖 HELP",
+  sec_basic:"基本設定",sec_transfer:"転送モード",
+  lbl_pad:"ペリフェラル名",tip_pad:"PCから見た発射台の方向名またはデバイス名。peripheral.getNames() で確認。例: top, bottom, left",ph_pad:"top / bottom / cargo_rocket_launch_pad_0",
+  lbl_origin:"発射地点（現在地）",tip_origin:"ロケットが現在いる惑星。必要ティア = max(発射地点, 目的地)。",
+  lbl_dest:"目的地",tip_dest:"目標の惑星。launch_pad.getValidDestinations() で確認できます。",
+  tier_label:"必要ロケットティア：",tier_notes:["（どのロケットでもOK）","（Tier 1以上）","（Tier 2以上）","（Tier 3以上）","（Tier 4以上）"],
+  lbl_interval:"エネルギー確認間隔（秒）",tip_interval:"エネルギーが足りない間、何秒ごとに再確認するか。",
+  lbl_return:"帰還待機時間（秒）",tip_return:"発射後、ロケットが帰還するまで何秒待つか。",
+  lbl_fuelcheck:"燃料チェック",tip_fuelcheck:"発射前に燃料を確認。発射台の底面（Bottom）にパイプで供給してください。",
+  fuel_warn:"不足時に警告",fuel_wait:"満タンまで待機",fuel_none:"無効",
+  lbl_minfuel:"最低必要燃料（mB）",tip_minfuel:"発射前に必要な最低燃料量。デフォルト 3000 mB = バケツ3個。",
+  lbl_cargocheck:"カーゴ流体チェック",tip_cargocheck:"帰還後のカーゴ流体を確認。上面・側面のパイプで供給・排出できます。",
+  cargo_log:"種類と量をログ出力",cargo_wait_fill:"満タンまで待機",cargo_wait_empty:"空になるまで待機",cargo_none:"無効",
+  lbl_cargothreshold:"カーゴしきい値（mB）",tip_cargothreshold:"待機する目標量（mB）。0=空まで、空欄=満タンまで。",
+  mode_simple:"⚡ シンプル",mode_manual:"🔧 マニュアル",
+  tip_transfer:"シンプル: loadAllItems/unloadAllItems で一括転送。マニュアル: スロット番号を個別指定。",
+  lbl_loadfilter:"ロードフィルター",tip_loadfilter:"アイテムIDでフィルター。空白 = 全アイテム。",ph_loadfilter:"例: minecraft:cobblestone",
+  lbl_unloadfilter:"アンロードフィルター",tip_unloadfilter:"アンロード用フィルター。空白 = 全て。",ph_unloadfilter:"例: minecraft:iron_ore",
+  manual_load:"積み込み（発射台 → ロケット）",manual_unload:"降ろし（ロケット → 発射台）",
+  btn_addslot:"+ スロット追加",btn_generate:"⚡ スクリプト生成",btn_copy:"📋 コピー",btn_dl:"💾 DL",btn_copied:"✅ コピー完了！",
+  stat_lines:"行数",stat_mode:"モード",stat_fuel:"燃料",placeholder_text:"設定を入力してスクリプトを生成してください",
+  slot_pad:"発射台",slot_rocket:"ロケット",
+  orbit_earth:"（地球の衛星軌道）",orbit_moon:"（月の衛星軌道）",orbit_mars:"（火星の衛星軌道）",orbit_mercury:"（水星の衛星軌道）",orbit_venus:"（金星の衛星軌道）",orbit_glacio:"（グラシオの衛星軌道）",
+  pal_control:"制御フロー",pal_check:"確認",pal_action:"アクション",
+  blk_loop:"ループ（無限）",blk_energy:"エネルギー待機",blk_fuel:"燃料チェック",blk_rocketcheck:"ロケット確認",blk_cargo:"カーゴ流体",
+  blk_load:"アイテム積み込み",blk_launch:"発射",blk_returnwait:"帰還待機",blk_unload:"アイテム降ろし",blk_log:"メッセージ表示",
+  canvas_title:"// ブロックをここにドラッグしてスクリプトを組み立てる",canvas_empty:"左パネルからブロックをドラッグしてください",
+  btn_preset:"📋 プリセット読込",btn_clear:"🗑 クリア",vb_placeholder:"ブロックを追加してスクリプトを生成してください",
+  p_pad:"ペリフェラル",p_planet:"惑星",p_interval:"間隔(秒)",p_wait:"待機(秒)",p_minfuel:"最低燃料(mB)",p_filter:"フィルター",p_slot_pad:"発射台スロット",p_slot_rocket:"ロケットスロット",p_msg:"メッセージ",p_cargo_mode:"モード",
+  p_fuel_mode:"モード",fuelmode_warn:"warn",fuelmode_wait:"wait",cargomode_log:"log",cargomode_fill:"wait_fill",cargomode_empty:"wait_empty",
+  nav_start:"はじめに",nav_setup:"セットアップ手順",nav_fuel:"燃料の設定",nav_fluid:"液体輸送",
+  nav_usage:"使い方",nav_script:"スクリプトの使い方",nav_visual:"ビジュアルビルダー",nav_roundtrip:"往復自動化",nav_tiers:"ティア表",
+  nav_ref:"リファレンス",nav_api:"Lua API 一覧",nav_examples:"スクリプト例",nav_support:"サポート",nav_trouble:"トラブルシューティング",
+}};
+
+// ============================================================
+// LANG & TABS
+// ============================================================
+let lang='en',currentMode='simple',currentHelp='setup',modVer='v122';
+function setVer(v){modVer=v;applyVer();}
+function applyVer(){
+  const is111=modVer==='v121';
+  document.querySelectorAll('.v112-only').forEach(el=>el.style.display=is111?'none':'');
+  // v1.2.1ではSimpleモードが使えないのでManualに強制切替
+  if(is111&&currentMode==='simple'){const mb=document.getElementById('btn-simple');if(mb){const manualBtn=document.querySelector('[onclick*="setMode\'manual"]');if(manualBtn)setMode('manual',manualBtn);}}
+  // version-badge更新
+  document.querySelector('.version-badge').textContent='Forge 1.20.1 · '+(is111?'v1.2.1':'v1.2.2');document.getElementById('verSelect').value=modVer;
+  renderHelp(currentHelp);
+}
+function setLang(l){lang=l;applyTranslations();renderHelp(currentHelp);}
+function switchTab(id,btn){document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');btn.classList.add('active');}
+function showHelp(id,btn){currentHelp=id;document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));btn.classList.add('active');renderHelp(id);}
+function applyTranslations(){
+  const t=T[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(t[k]!==undefined){const tips=[...el.querySelectorAll('.tip-wrap')];el.childNodes.forEach(n=>{if(n.nodeType===3)n.textContent='';});el.insertBefore(document.createTextNode(t[k]),el.firstChild);}});
+  document.querySelectorAll('.tip-box[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(t[k])el.textContent=t[k];});
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.dataset.i18nPlaceholder;if(t[k])el.placeholder=t[k];});
+  document.querySelectorAll('option[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(t[k])el.textContent=t[k];});
+  document.querySelectorAll('option[data-i18n-suffix]').forEach(el=>{const k=el.dataset.i18nSuffix;if(t[k]){const icon=el.textContent.trim().charAt(0)+' ';const dash=el.textContent.includes('—')?' — '+el.textContent.split('—')[1].trim():'';el.textContent=icon+el.value+dash+' '+t[k];}});
+  const tl=document.querySelector('#tierResult span');if(tl)tl.textContent=t.tier_label;
+  if(document.getElementById('tierResult').style.display!=='none')calcTier();
+  renderVisualBlocks();
 }
 
-// ===== HELP NAV =====
-function showHelp(id, btn) {
-  document.querySelectorAll('.help-page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('help-' + id).classList.add('active');
-  btn.classList.add('active');
-}
+// ============================================================
+// TIER CALC
+// ============================================================
+const TIER={"minecraft:overworld":0,"ad_astra:earth_orbit":1,"ad_astra:moon":1,"ad_astra:moon_orbit":1,"ad_astra:mars":2,"ad_astra:mars_orbit":2,"ad_astra:mercury":3,"ad_astra:mercury_orbit":3,"ad_astra:venus":3,"ad_astra:venus_orbit":3,"ad_astra:glacio":4,"ad_astra:glacio_orbit":4};
+function calcTier(){const req=Math.max(TIER[document.getElementById('origin').value]??0,TIER[document.getElementById('planet').value]??0);const colors=['var(--green)','var(--accent2)','var(--amber)','#fb923c','var(--red)'];const el=document.getElementById('tierResult');el.style.display='block';document.getElementById('tierVal').textContent='Tier '+req;document.getElementById('tierVal').style.color=colors[req];document.getElementById('tierNote').textContent=T[lang].tier_notes[req];}
 
-// ===== TIER CALC =====
-const TIER = {
-  "minecraft:overworld":0,"ad_astra:earth_orbit":1,
-  "ad_astra:moon":1,"ad_astra:moon_orbit":1,
-  "ad_astra:mars":2,"ad_astra:mars_orbit":2,
-  "ad_astra:mercury":3,"ad_astra:mercury_orbit":3,
-  "ad_astra:venus":3,"ad_astra:venus_orbit":3,
-  "ad_astra:glacio":4,"ad_astra:glacio_orbit":4,
-};
-function calcTier() {
-  const req = Math.max(TIER[document.getElementById('origin').value]??0, TIER[document.getElementById('planet').value]??0);
-  const el = document.getElementById('tierResult');
-  const colors = ['var(--green)','var(--accent2)','var(--amber)','#fb923c','var(--red)'];
-  const notes  = ['(どのロケットでもOK)','(Tier 1 以上)','(Tier 2 以上)','(Tier 3 以上)','(Tier 4 以上)'];
-  el.style.display = 'block';
-  document.getElementById('tierVal').textContent  = 'Tier ' + req;
-  document.getElementById('tierVal').style.color  = colors[req];
-  document.getElementById('tierNote').textContent = notes[req];
-}
+// ============================================================
+// GENERATOR MODES & SLOTS
+// ============================================================
+function setMode(mode,btn){currentMode=mode;document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.mode-panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('mode-'+mode).classList.add('active');}
+addLoad(10,1);addUnload(1,10);
+function addLoad(ps=10,rs=1){const el=document.createElement('div');el.className='slot-item';const pl=T[lang].slot_pad,rl=T[lang].slot_rocket;el.innerHTML=`<span>${pl}</span><input type="number" class="ps" value="${ps}" min="1" max="27"><div class="arrow">→</div><span>${rl}</span><input type="number" class="rs" value="${rs}" min="1" max="27"><button class="del-btn" onclick="this.parentElement.remove()">×</button>`;document.getElementById('loadSlots').appendChild(el);}
+function addUnload(rs=1,ps=10){const el=document.createElement('div');el.className='slot-item';const pl=T[lang].slot_pad,rl=T[lang].slot_rocket;el.innerHTML=`<span>${rl}</span><input type="number" class="rs" value="${rs}" min="1" max="27"><div class="arrow">→</div><span>${pl}</span><input type="number" class="ps" value="${ps}" min="1" max="27"><button class="del-btn" onclick="this.parentElement.remove()">×</button>`;document.getElementById('unloadSlots').appendChild(el);}
 
-// ===== SLOTS =====
-addLoad(10, 1); addUnload(1, 10);
-function addLoad(ps=10, rs=1) {
-  const el = document.createElement('div'); el.className = 'slot-item';
-  el.innerHTML = `<span>発射台</span><input type="number" class="ps" value="${ps}" min="1" max="27"><div class="arrow">→</div><span>ロケット</span><input type="number" class="rs" value="${rs}" min="1" max="27"><button class="del-btn" onclick="this.parentElement.remove()">×</button>`;
-  document.getElementById('loadSlots').appendChild(el);
-}
-function addUnload(rs=1, ps=10) {
-  const el = document.createElement('div'); el.className = 'slot-item';
-  el.innerHTML = `<span>ロケット</span><input type="number" class="rs" value="${rs}" min="1" max="27"><div class="arrow">→</div><span>発射台</span><input type="number" class="ps" value="${ps}" min="1" max="27"><button class="del-btn" onclick="this.parentElement.remove()">×</button>`;
-  document.getElementById('unloadSlots').appendChild(el);
-}
+// ============================================================
+// HIGHLIGHT
+// ============================================================
+function hl(code){return code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/(--[^\n]*)/g,'<span class="cmt">$1</span>').replace(/\b(local|while|do|end|if|then|else|elseif|not|and|or|true|false|nil|function|return|break|for|in|repeat|until)\b/g,'<span class="kw">$1</span>').replace(/"([^"]*)"/g,'<span class="str">"$1"</span>').replace(/\b(\d+)\b/g,'<span class="num">$1</span>').replace(/\b(peripheral|sleep|print|error|pcall|tostring|pairs)\b/g,'<span class="fn">$1</span>');}
 
-// ===== HIGHLIGHT =====
-function hl(code) {
-  return code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/(--[^\n]*)/g,'<span class="cmt">$1</span>')
-    .replace(/\b(local|while|do|end|if|then|else|elseif|not|and|or|true|false|nil|function|return|break|for|in|repeat|until)\b/g,'<span class="kw">$1</span>')
-    .replace(/"([^"]*)"/g,'<span class="str">"$1"</span>')
-    .replace(/\b(\d+)\b/g,'<span class="num">$1</span>')
-    .replace(/\b(peripheral|sleep|print|error|pcall|tostring|pairs)\b/g,'<span class="fn">$1</span>');
-}
-
-// ===== GENERATE =====
-function generate() {
-  const pad = document.getElementById('padName').value.trim() || 'top';
-  const planet = document.getElementById('planet').value || 'minecraft:overworld';
-  const interval = parseInt(document.getElementById('energyInterval').value) || 5;
-  const returnWait = parseInt(document.getElementById('returnWait').value) || 30;
-  const loads   = [...document.querySelectorAll('#loadSlots .slot-item')].map(r => ({ps:r.querySelector('.ps').value, rs:r.querySelector('.rs').value}));
-  const unloads = [...document.querySelectorAll('#unloadSlots .slot-item')].map(r => ({rs:r.querySelector('.rs').value, ps:r.querySelector('.ps').value}));
-  const loadLines   = loads.length   ? loads.map(s=>`  launch_pad.moveItemsFromLaunchPadToRocket(${s.ps}, ${s.rs})`).join('\n')   : '  -- 積み込みスロットなし';
-  const unloadLines = unloads.length ? unloads.map(s=>`  launch_pad.moveItemsFromRocketToLaunchPad(${s.rs}, ${s.ps})`).join('\n') : '  -- 降ろしスロットなし';
-  const code = `-- ============================================
--- Cargo Rocket 自動化スクリプト
+// ============================================================
+// GENERATE
+// ============================================================
+function buildCode(cfg){
+  const{pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine}=cfg;
+  let fuelBlock='';
+  if(fuelCheck==='wait'){fuelBlock=`\n  -- Wait for fuel\n  while true do\n    local fuel = launch_pad.getFuel()\n    print("[FUEL] " .. fuel .. " / ${minFuel} mB")\n    if fuel >= ${minFuel} then print("[OK] Fuel ready") break end\n    sleep(ENERGY_INTERVAL)\n  end\n`;}
+  else if(fuelCheck==='warn'){fuelBlock=`\n  local fuel = launch_pad.getFuel()\n  if fuel < ${minFuel} then print("[WARN] Low fuel: " .. fuel .. " mB") else print("[OK] Fuel: " .. fuel .. " mB") end\n`;}
+  let cargoBlock='';
+  if(cargoCheck==='log'){cargoBlock=`\n      print("[CARGO] " .. launch_pad.getCargoFluidType() .. " : " .. launch_pad.getCargoFluid() .. " mB")`;}
+  else if(cargoCheck==='wait_fill'){cargoBlock=`\n      while true do\n        local cf=launch_pad.getCargoFluid()\n        local target=${cargoThreshold}>0 and ${cargoThreshold} or launch_pad.getMaxCargoFluid()\n        print("[CARGO] " .. cf .. "/" .. target .. " mB")\n        if cf>=target then print("[OK] Cargo ready") break end\n        sleep(ENERGY_INTERVAL)\n      end`;}
+  else if(cargoCheck==='wait_empty'){cargoBlock=`\n      while true do\n        local cf=launch_pad.getCargoFluid()\n        print("[CARGO] draining: " .. cf .. " mB")\n        if cf<=${cargoThreshold} then print("[OK] Cargo drained") break end\n        sleep(ENERGY_INTERVAL)\n      end`;}
+  return `-- ============================================
+-- Cargo Rocket Automation Script
 -- Ad Astra + CC:Tweaked
--- 生成: ${new Date().toLocaleString('ja-JP')}
 -- ============================================
 
-local PERIPHERAL = "${pad}"
-local PLANET     = "${planet}"
+local PERIPHERAL      = "${pad}"
+local PLANET          = "${planet}"
 local ENERGY_INTERVAL = ${interval}
 local RETURN_WAIT     = ${returnWait}
+local MIN_FUEL        = ${minFuel}
 
 local launch_pad = peripheral.wrap(PERIPHERAL)
-if not launch_pad then
-  error("Launch pad not found: " .. PERIPHERAL)
-end
+if not launch_pad then error("Launch pad not found: " .. PERIPHERAL) end
 
 print("[BOOT] Cargo Rocket automation started")
-print("[設定] 目的地: " .. PLANET)
+print("[INFO] Destination: " .. PLANET)
 
 while true do
 
-  print("[WAIT] Charging energy...")
+  -- Wait for energy
   while true do
-    local energy   = launch_pad.getEnergy()
+    local energy = launch_pad.getEnergy()
     local required = launch_pad.getEnergyRequiredForLaunch()
-    print("  エネルギー: " .. energy .. " / " .. required)
-    if energy >= required then
-      print("[OK] Energy charged")
-      break
-    end
+    print("[ENERGY] " .. energy .. " / " .. required)
+    if energy >= required then print("[OK] Energy charged") break end
     sleep(ENERGY_INTERVAL)
   end
-
+${fuelBlock}
   if not launch_pad.isRocketPresent() then
-    print("[WARN] No rocket found. Waiting...")
+    print("[WARN] No rocket. Waiting...")
     sleep(ENERGY_INTERVAL)
   else
     print("[LOAD] Moving items to rocket...")
-${loadLines}
-    print("[OK] Items loaded")
-
+${loadLine}
     print("[LAUNCH] Launching to " .. PLANET)
-    local ok, err = pcall(function()
-      launch_pad.launch(PLANET)
-    end)
-
+    local ok, err = pcall(function() launch_pad.launch(PLANET) end)
     if not ok then
-      print("[ERROR] Launch failed: " .. tostring(err))
+      print("[ERROR] " .. tostring(err))
       sleep(ENERGY_INTERVAL)
     else
-      print("[FLIGHT] Waiting " .. RETURN_WAIT .. " sec for return...")
+      print("[FLIGHT] Waiting " .. RETURN_WAIT .. " sec...")
       sleep(RETURN_WAIT)
-      print("[UNLOAD] Retrieving items from rocket...")
-${unloadLines}
-      print("[DONE] Cycle complete. Starting next cycle...")
+      print("[UNLOAD] Retrieving items...")
+${unloadLine}${cargoBlock}
+      print("[DONE] Cycle complete.")
     end
   end
 
 end`;
-  window._code = code;
-  document.getElementById('placeholder').style.display = 'none';
-  const block = document.getElementById('codeBlock');
-  block.style.display = 'block';
-  block.innerHTML = hl(code);
-  document.getElementById('stats').style.display = 'grid';
-  document.getElementById('statLines').textContent = code.split('\n').length;
-  document.getElementById('statLoad').textContent = loads.length;
-  document.getElementById('statUnload').textContent = unloads.length;
 }
 
-function copyCode() {
-  if (!window._code) return;
-  navigator.clipboard.writeText(window._code).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = '✅ コピー完了'; btn.classList.add('success');
-    setTimeout(() => { btn.textContent = '📋 コピー'; btn.classList.remove('success'); }, 2000);
+function generate(){
+  const pad=document.getElementById('padName').value.trim()||'top';
+  const planet=document.getElementById('planet').value||'minecraft:overworld';
+  const interval=parseInt(document.getElementById('energyInterval').value)||5;
+  const returnWait=parseInt(document.getElementById('returnWait').value)||30;
+  const fuelCheck=modVer==='v122'?document.getElementById('fuelCheck').value:'none';
+  const minFuel=parseInt(document.getElementById('minFuel').value)||3000;
+  const cargoCheck=modVer==='v122'?document.getElementById('cargoCheck').value:'none';
+  const cargoThreshold=parseInt(document.getElementById('cargoThreshold').value)||0;
+  let loadLine,unloadLine;
+  if(currentMode==='simple'&&modVer==='v122'){const lf=document.getElementById('loadFilter').value.trim();const uf=document.getElementById('unloadFilter').value.trim();loadLine=lf?`  launch_pad.loadAllItems("${lf}")`:`  launch_pad.loadAllItems()`;unloadLine=uf?`  launch_pad.unloadAllItems("${uf}")`:`  launch_pad.unloadAllItems()`;}
+  else{const loads=[...document.querySelectorAll('#loadSlots .slot-item')].map(r=>({ps:r.querySelector('.ps').value,rs:r.querySelector('.rs').value}));const unloads=[...document.querySelectorAll('#unloadSlots .slot-item')].map(r=>({rs:r.querySelector('.rs').value,ps:r.querySelector('.ps').value}));loadLine=loads.length?loads.map(s=>`  launch_pad.moveItemsFromLaunchPadToRocket(${s.ps},${s.rs})`).join('\n'):'  -- no load slots';unloadLine=unloads.length?unloads.map(s=>`  launch_pad.moveItemsFromRocketToLaunchPad(${s.rs},${s.ps})`).join('\n'):'  -- no unload slots';}
+  const code=buildCode({pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine});
+  window._code=code;
+  document.getElementById('placeholder').style.display='none';
+  const block=document.getElementById('codeBlock');block.style.display='block';block.innerHTML=hl(code);
+  document.getElementById('stats').style.display='grid';
+  document.getElementById('statLines').textContent=code.split('\n').length;
+  document.getElementById('statMode').textContent=currentMode==='simple'?'Simple':'Manual';
+  document.getElementById('statFuel').textContent=fuelCheck==='none'?'OFF':fuelCheck==='wait'?'WAIT':'WARN';
+}
+function copyCode(){if(!window._code)return;navigator.clipboard.writeText(window._code).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=T[lang].btn_copied;btn.classList.add('success');setTimeout(()=>{btn.textContent=T[lang].btn_copy;btn.classList.remove('success');},2000);});}
+function downloadCode(){if(!window._code)return;const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(window._code);a.download='startup.lua';a.click();}
+
+// ============================================================
+// VISUAL BUILDER
+// ============================================================
+let vbBlocks=[];
+let dragSrcType=null,dragSrcIdx=null;
+
+const BLOCK_DEFS={
+  loop:{icon:'🔁',cls:'pb-loop',label:()=>T[lang].blk_loop,params:[]},
+  energy:{icon:'⚡',cls:'pb-energy',label:()=>T[lang].blk_energy,params:[{key:'pad',type:'text',def:'top'},{key:'interval',type:'number',def:5}]},
+  fuel:{icon:'🛢️',cls:'pb-fuel',label:()=>T[lang].blk_fuel,params:[{key:'minfuel',type:'number',def:3000},{key:'fuel_mode',type:'select',def:'wait',opts:['warn','wait']}]},
+  rocketcheck:{icon:'🚀',cls:'pb-check',label:()=>T[lang].blk_rocketcheck,params:[]},
+  cargo:{icon:'🧪',cls:'pb-cargo',label:()=>T[lang].blk_cargo,params:[{key:'cargo_mode',type:'select',def:'log',opts:['log','wait_fill','wait_empty']}]},
+  load:{icon:'📦',cls:'pb-load',label:()=>T[lang].blk_load,params:[{key:'filter',type:'text',def:''}]},
+  launch:{icon:'🚀',cls:'pb-launch',label:()=>T[lang].blk_launch,params:[{key:'planet',type:'text',def:'minecraft:overworld'}]},
+  returnwait:{icon:'⏳',cls:'pb-wait',label:()=>T[lang].blk_returnwait,params:[{key:'wait',type:'number',def:30}]},
+  unload:{icon:'📤',cls:'pb-unload',label:()=>T[lang].blk_unload,params:[{key:'filter',type:'text',def:''}]},
+  log:{icon:'📝',cls:'pb-log',label:()=>T[lang].blk_log,params:[{key:'msg',type:'text',def:'Hello!'}]},
+};
+
+const PARAM_LABELS={pad:'p_pad',interval:'p_interval',minfuel:'p_minfuel',filter:'p_filter',planet:'p_planet',wait:'p_wait',msg:'p_msg',cargo_mode:'p_cargo_mode',fuel_mode:'p_fuel_mode'};
+
+// パレット全体に委譲（動的に変わってもOK）
+document.getElementById('tab-visual').addEventListener('dragstart',e=>{
+  const pb=e.target.closest('.palette-block');
+  if(pb){dragSrcType=pb.dataset.type;dragSrcIdx=null;e.dataTransfer.effectAllowed='copy';e.dataTransfer.setData('text/plain',pb.dataset.type);}
+});
+
+// canvasAreaへのドロップ（委譲）
+function initCanvasDrop(){
+  const area=document.getElementById('canvasArea');
+  if(!area)return;
+  area.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';});
+  area.addEventListener('drop',e=>{
+    e.preventDefault();
+    // canvas内の既存ブロック上へのドロップはrenderVisualBlocks内のイベントで処理
+    // ここはキャンバス空白部分へのドロップのみ処理
+    if(e.target===area||e.target.classList.contains('canvas-empty')||e.target.closest('.canvas-empty')){
+      if(dragSrcType!==null&&dragSrcIdx===null){
+        const def=BLOCK_DEFS[dragSrcType];if(!def){dragSrcType=null;return;}
+        const params={};def.params.forEach(p=>params[p.key]=p.def);
+        vbBlocks.push({type:dragSrcType,params});
+        renderVisualBlocks();
+        initCanvasDrop();
+      }
+      dragSrcType=null;dragSrcIdx=null;
+    }
   });
 }
-function downloadCode() {
-  if (!window._code) return;
-  const a = document.createElement('a');
-  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(window._code);
-  a.download = 'startup.lua'; a.click();
+function renderVisualBlocks(){
+  const area=document.getElementById('canvasArea');
+  area.innerHTML='';
+  if(vbBlocks.length===0){
+    area.innerHTML='<div class="canvas-empty" id="canvasEmpty"><div class="icon">🧩</div><span>'+( T[lang].canvas_empty||'Drag blocks from the left panel')+'</span></div>';
+    return;
+  }
+  const t=T[lang];
+  vbBlocks.forEach((blk,i)=>{
+    const def=BLOCK_DEFS[blk.type];if(!def)return;
+    const div=document.createElement('div');
+    div.className='canvas-block '+def.cls;
+    div.draggable=true;
+    div.dataset.idx=i;
+    div.addEventListener('dragstart',e=>{dragSrcIdx=i;dragSrcType=blk.type;e.dataTransfer.effectAllowed='move';div.classList.add('dragging');});
+    div.addEventListener('dragend',()=>div.classList.remove('dragging'));
+    div.addEventListener('dragover',e=>{e.preventDefault();div.classList.add('drag-over');});
+    div.addEventListener('dragleave',()=>div.classList.remove('drag-over'));
+    div.addEventListener('drop',e=>{
+      e.preventDefault();e.stopPropagation();div.classList.remove('drag-over');
+      if(dragSrcIdx!==null&&dragSrcIdx!==i){
+        const moved=vbBlocks.splice(dragSrcIdx,1)[0];vbBlocks.splice(i,0,moved);renderVisualBlocks();
+      } else if(dragSrcIdx===null&&dragSrcType){
+        const defn=BLOCK_DEFS[dragSrcType];
+        if(defn){const params={};defn.params.forEach(p=>params[p.key]=p.def);vbBlocks.splice(i,0,{type:dragSrcType,params});renderVisualBlocks();}
+      }
+      dragSrcType=null;dragSrcIdx=null;
+    });
+    let paramsHtml='';
+    def.params.forEach(p=>{
+      const lbl=t[PARAM_LABELS[p.key]]||p.key;
+      if(p.type==='select'){
+        const opts=p.opts.map(o=>`<option value="${o}"${blk.params[p.key]===o?' selected':''}>${t['cargomode_'+o]||t['fuelmode_'+o]||o}</option>`).join('');
+        paramsHtml+=`<div class="cb-param"><span>${lbl}:</span><select onchange="vbBlocks[${i}].params['${p.key}']=this.value">${opts}</select></div>`;
+      } else {
+        paramsHtml+=`<div class="cb-param"><span>${lbl}:</span><input type="${p.type}" value="${blk.params[p.key]}" onchange="vbBlocks[${i}].params['${p.key}']=this.${p.type==='number'?'value':'value'}"></div>`;
+      }
+    });
+    div.innerHTML=`
+      <div class="cb-move">
+        <button onclick="moveBlock(${i},-1)">▲</button>
+        <button onclick="moveBlock(${i},1)">▼</button>
+      </div>
+      <div class="cb-icon">${def.icon}</div>
+      <div class="cb-body">
+        <div class="cb-title">${def.label()}</div>
+        ${paramsHtml?`<div class="cb-params">${paramsHtml}</div>`:''}
+      </div>
+      <button class="cb-del" onclick="removeBlock(${i})">×</button>`;
+    area.appendChild(div);
+  });
+  // キャンバス空白部ドロップを再登録
+  area.addEventListener('dragover',e=>{e.preventDefault();});
+  area.addEventListener('drop',e=>{
+    e.preventDefault();
+    if((e.target===area)&&dragSrcType!==null&&dragSrcIdx===null){
+      const def=BLOCK_DEFS[dragSrcType];if(!def){dragSrcType=null;return;}
+      const params={};def.params.forEach(p=>params[p.key]=p.def);
+      vbBlocks.push({type:dragSrcType,params});
+      renderVisualBlocks();
+    }
+    dragSrcType=null;dragSrcIdx=null;
+  });
 }
+function moveBlock(i,dir){const ni=i+dir;if(ni<0||ni>=vbBlocks.length)return;[vbBlocks[i],vbBlocks[ni]]=[vbBlocks[ni],vbBlocks[i]];renderVisualBlocks();}
+function removeBlock(i){vbBlocks.splice(i,1);renderVisualBlocks();}
+function clearCanvas(){vbBlocks=[];renderVisualBlocks();}
+function loadPreset(){
+  vbBlocks=[
+    {type:'loop',params:{}},
+    {type:'energy',params:{pad:'top',interval:5}},
+    {type:'fuel',params:{minfuel:3000,fuel_mode:'wait'}},
+    {type:'rocketcheck',params:{}},
+    {type:'load',params:{filter:''}},
+    {type:'launch',params:{planet:'minecraft:overworld'}},
+    {type:'returnwait',params:{wait:30}},
+    {type:'unload',params:{filter:''}},
+    {type:'cargo',params:{cargo_mode:'log'}},
+  ];
+  renderVisualBlocks();
+}
+
+function vbGenerate(){
+  if(vbBlocks.length===0)return;
+  let lines=["-- Visual Builder Script","-- Ad Astra + CC:Tweaked","","local ENERGY_INTERVAL = 5","local launch_pad -- set in energy block","",""];
+  let indent=0;
+  const ind=()=>'  '.repeat(indent);
+  vbBlocks.forEach(blk=>{
+    const p=blk.params;
+    switch(blk.type){
+      case 'loop': lines.push(ind()+'while true do');indent++;break;
+      case 'energy':
+        lines.push(ind()+`launch_pad = peripheral.wrap("${p.pad||'top'}")`);
+        lines.push(ind()+'if not launch_pad then error("Launch pad not found") end');
+        lines.push(ind()+'while true do');indent++;
+        lines.push(ind()+'local energy = launch_pad.getEnergy()');
+        lines.push(ind()+'local required = launch_pad.getEnergyRequiredForLaunch()');
+        lines.push(ind()+'print("[ENERGY] " .. energy .. " / " .. required)');
+        lines.push(ind()+`if energy >= required then print("[OK] Charged") break end`);
+        lines.push(ind()+`sleep(${p.interval||5})`);
+        indent--;lines.push(ind()+'end');break;
+      case 'fuel':
+        if(p.fuel_mode==='wait'){
+          lines.push(ind()+'while true do');indent++;
+          lines.push(ind()+'local fuel = launch_pad.getFuel()');
+          lines.push(ind()+`print("[FUEL] " .. fuel .. " / ${p.minfuel||3000} mB")`);
+          lines.push(ind()+`if fuel >= ${p.minfuel||3000} then print("[OK] Fuel ready") break end`);
+          lines.push(ind()+'sleep(ENERGY_INTERVAL)');
+          indent--;lines.push(ind()+'end');
+        } else {
+          lines.push(ind()+'local fuel = launch_pad.getFuel()');
+          lines.push(ind()+`if fuel < ${p.minfuel||3000} then print("[WARN] Low fuel: " .. fuel .. " mB") end`);
+        }
+        break;
+      case 'rocketcheck':
+        lines.push(ind()+'if not launch_pad.isRocketPresent() then');indent++;
+        lines.push(ind()+'print("[WARN] No rocket. Waiting...")');
+        lines.push(ind()+'sleep(ENERGY_INTERVAL)');
+        indent--;lines.push(ind()+'else');indent++;break;
+      case 'load':
+        if(p.filter&&p.filter!==''){lines.push(ind()+`launch_pad.loadAllItems("${p.filter}")`);}
+        else{lines.push(ind()+'launch_pad.loadAllItems()');}
+        break;
+      case 'launch':
+        lines.push(ind()+`local ok, err = pcall(function() launch_pad.launch("${p.planet||'minecraft:overworld'}") end)`);
+        lines.push(ind()+'if not ok then print("[ERROR] " .. tostring(err)) else');indent++;break;
+      case 'returnwait':
+        lines.push(ind()+`print("[FLIGHT] Waiting ${p.wait||30} sec...")`);
+        lines.push(ind()+`sleep(${p.wait||30})`);break;
+      case 'unload':
+        if(p.filter&&p.filter!==''){lines.push(ind()+`launch_pad.unloadAllItems("${p.filter}")`);}
+        else{lines.push(ind()+'launch_pad.unloadAllItems()');}
+        break;
+      case 'cargo':
+        if(p.cargo_mode==='log'){lines.push(ind()+'print("[CARGO] " .. launch_pad.getCargoFluidType() .. " : " .. launch_pad.getCargoFluid() .. " mB")');}
+        else if(p.cargo_mode==='wait_fill'){lines.push(ind()+'while launch_pad.getCargoFluid() < launch_pad.getMaxCargoFluid() do sleep(ENERGY_INTERVAL) end');}
+        else if(p.cargo_mode==='wait_empty'){lines.push(ind()+'while launch_pad.getCargoFluid() > 0 do sleep(ENERGY_INTERVAL) end');}
+        break;
+      case 'log': lines.push(ind()+`print("${p.msg||''}")`);break;
+    }
+  });
+  // close open blocks
+  while(indent>0){indent--;lines.push(ind()+'end');}
+  const code=lines.join('\n');
+  window._vbCode=code;
+  document.getElementById('vbPlaceholder').style.display='none';
+  const block=document.getElementById('vbCodeBlock');block.style.display='block';block.innerHTML=hl(code);
+}
+function vbCopyCode(){if(!window._vbCode)return;navigator.clipboard.writeText(window._vbCode).then(()=>{const btn=document.getElementById('vbCopyBtn');btn.textContent=T[lang].btn_copied;btn.classList.add('success');setTimeout(()=>{btn.textContent=T[lang].btn_copy;btn.classList.remove('success');},2000);});}
+function vbDownloadCode(){if(!window._vbCode)return;const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(window._vbCode);a.download='visual_script.lua';a.click();}
+
+// ============================================================
+// HELP RENDERER
+// ============================================================
+function renderHelp(id){
+  const h=T[lang];
+  const main=document.getElementById('helpMain');
+  const pages={
+    setup:renderSetup,fuel:renderFuel,fluid:renderFluid,script:renderScript,
+    visual:renderVisualHelp,roundtrip:renderRoundtrip,tiers:renderTiers,
+    api:renderApi,examples:renderExamples,trouble:renderTrouble
+  };
+  main.innerHTML=(pages[id]||renderSetup)(h);
+  // re-apply ver styling after render
+  document.querySelectorAll('#helpMain .v112-only').forEach(el=>el.style.display=modVer==='v121'?'none':'');
+}
+
+function steps(arr){return`<div class="steps">${arr.map((s,i)=>`<div class="step"><div class="step-num">${i+1}</div><div class="step-body"><div class="step-title">${s.t}</div><div class="step-desc">${s.d}</div></div></div>`).join('')}</div>`;}
+function apiTable(rows,th=['Function','Returns','Description']){return`<table class="api-table"><thead><tr>${th.map(t=>`<th>${t}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr><td class="fn-name">${r.fn}</td><td class="fn-ret">${r.ret}</td><td>${r.d}</td></tr>`).join('')}</tbody></table>`;}
+function errCards(arr){return`<div class="error-cards">${arr.map(c=>`<div class="error-card ${c.cls||''}"><div class="error-title">${c.t}</div><div class="error-body">${c.b}</div></div>`).join('')}</div>`;}
+
+
+function renderSetup(){
+  const isJa=lang==='ja';
+  return`<div class="page-title">${isJa?'セットアップ手順':'Setup Guide'}</div>
+<p class="page-desc">${isJa?'Ad Astra Cargo Rockets と CC:Tweaked を使って自動化を始めるための手順です。':'How to get started with Ad Astra Cargo Rockets and CC:Tweaked.'}</p>
+<h2>${isJa?'必要なMOD':'Required MODs'}</h2>
+${steps(isJa?[
+  {t:'Ad Astra',d:'宇宙MOD本体。ロケットや惑星を追加します。Forge 1.20.1 版を導入してください。'},
+  {t:'Ad Astra Cargo Rockets',d:'CC:Tweaked でロケットを自動制御できるようにするアドオン。CurseForge または Modrinth から導入。'},
+  {t:'CC:Tweaked',d:'ComputerCraft の後継MOD。コンピュータブロックと Lua スクリプトを追加します。'},
+  {t:'Forge + Forge API',d:'Cargo Rockets の動作に必要な依存です。'},
+]:[
+  {t:'Ad Astra',d:'The main space mod. Adds rockets and planets. Use the Forge 1.20.1 version.'},
+  {t:'Ad Astra Cargo Rockets',d:'Add-on enabling CC:Tweaked automation. Install from CurseForge or Modrinth.'},
+  {t:'CC:Tweaked',d:'ComputerCraft successor. Adds computer blocks and Lua scripting.'},
+  {t:'Forge + Forge API',d:'Required dependencies for Cargo Rockets to function.'},
+])}
+<h2>${isJa?'ブロックの設置方法':'Block Placement'}</h2>
+${steps(isJa?[
+  {t:'Cargo Rocket Launch Pad を設置',d:'発射台を設置します。中央ブロックと外周ブロックで構成されています。'},
+  {t:'PCを発射台の中央ブロックに隣接させる',d:'⚠️ 外周ブロックではなく中央ブロックに隣接させてください。外周ではAPIが使えません。Peripheral Hub 経由でも可。'},
+  {t:'接続確認',d:'PCを開いて lua と入力後、以下のコマンドで確認します。'},
+]:[
+  {t:'Place Cargo Rocket Launch Pad',d:'Consists of a central block and surrounding outer blocks.'},
+  {t:'Connect PC to the CENTRAL block',d:'⚠️ Must be adjacent to the central block — not outer blocks. Outer blocks only expose generic inventory. Peripheral Hub also supported.'},
+  {t:'Verify Connection',d:'Open the PC, type lua, then run the commands below.'},
+])}
+<pre>peripheral.getNames()\n${isJa?'-- 例: { "top" } と表示されればOK':'-- Expected: { "top" } or similar'}\n\nlaunch_pad = peripheral.wrap("top")\nlaunch_pad.isRocketPresent()\n${isJa?'-- true/false が返ればAPI接続成功':'-- Returns true/false if API connected correctly'}</pre>
+<div class="hint">${isJa?'Peripheral Hub を使う場合も、Hubは必ず中央ブロックに隣接させてください。':'If using a Peripheral Hub, it must be adjacent to the central block.'}</div>`;
+}
+
+function renderFuel(){
+  const isJa=lang==='ja';
+  return`<div class="page-title">${isJa?'燃料の設定':'Fuel Setup'}</div>
+<p class="page-desc">${isJa?'ロケットにはFEエネルギーとは別に液体燃料が必要です。':'Rockets require liquid fuel separate from FE energy.'}</p>
+<h2>${isJa?'発射台の接続面':'Launchpad Fluid Connections'}</h2>
+<table class="fluid-table"><thead><tr><th>${isJa?'面':'Face'}</th><th>${isJa?'機能':'Function'}</th></tr></thead><tbody>
+<tr><td>⬇️ <strong>Bottom</strong></td><td>${isJa?'燃料タンク入力専用 — 燃料パイプをここに接続':'Fuel tank input only — connect fuel pipes here'}</td></tr>
+<tr><td>⬆️ Top / Sides</td><td>${isJa?'カーゴ流体タンク（入力・出力）':'Cargo fluid tank (input &amp; output)'}</td></tr>
+<tr><td>${isJa?'どの面でも':'Any side'}</td><td>Forge Energy (FE) ${isJa?'入力':'input'}</td></tr>
+</tbody></table>
+<h2>${isJa?'燃料の供給方法':'Supplying Fuel'}</h2>
+${steps(isJa?[
+  {t:'手動（バケツ）',d:'発射台の底面を燃料バケツで右クリックして補充。発射に3000 mB（バケツ3個）必要。'},
+  {t:'自動（パイプ）',d:'底面に流体パイプを接続。燃料精製機などからパイプで供給。'},
+]:[
+  {t:'Manual (bucket)',d:'Right-click the bottom face with a fuel bucket. 3000 mB (3 buckets) needed for launch.'},
+  {t:'Automatic (pipe)',d:'Connect a fluid pipe to the bottom face. Pipe from a Fuel Refinery.'},
+])}
+<h2>${isJa?'燃料の種類':'Fuel Types'}</h2>
+<p>${isJa?'通常燃料:':'Standard:'} <code>ad_astra:fuel</code><br>${isJa?'クライオ燃料:':'Cryo fuel:'} <code>ad_astra:cryo_fuel</code> ${isJa?'（高ティアロケット用）':'(for higher tier rockets)'}</p>
+<h2>${isJa?'Luaで燃料を確認（v1.2.2+）':'Check Fuel via Lua (v1.2.2+)'}</h2>
+<pre>launch_pad = peripheral.wrap("top")\nprint(launch_pad.getFuel() .. " / " .. launch_pad.getMaxFuel())\nprint(launch_pad.getFuelType())</pre>
+<div class="hint">${isJa?'v1.2.1では燃料APIは使えません。燃料は手動またはパイプで補充してください。':'Fuel API is not available in v1.2.1. Supply fuel manually or via pipe.'}</div>`;
+}
+
+function renderFluid(){
+  const isJa=lang==='ja';
+  return`<div class="page-title">${isJa?'液体輸送':'Fluid Transport'}</div>
+<p class="page-desc">${isJa?'ロケットで液体を惑星間輸送する方法です（v1.2.2+）。':'How to transport liquids between planets using rockets (v1.2.2+).'}</p>
+<div class="warn-box">${isJa?'この機能はv1.2.2以上が必要です。v1.2.1では液体APIが使えません。':'This feature requires v1.2.2+. Fluid API is not available in v1.2.1.'}</div>
+<h2>${isJa?'仕組み':'How It Works'}</h2>
+<p>${isJa?'発射台の上面・側面はカーゴ流体タンクに接続されています。ここに流体パイプを繋ぐことで液体を自動的に積み込み・降ろしできます。':'The top and side faces of the launchpad connect to the cargo fluid tank. Attach fluid pipes here to automatically load and unload liquids.'}</p>
+<div class="warn-box">${isJa?'液体の移動自体はパイプで行います。CCのAPIはあくまで残量の確認・待機のみです。':'Fluid movement is handled by pipes. The CC API only monitors levels and waits.'}</div>
+${steps(isJa?[
+  {t:'積み込み地点にパイプを設置',d:'発射台の上面・側面に流体パイプを繋ぎ、タンクから液体を注入。'},
+  {t:'「カーゴ流体チェック」を設定',d:'ジェネレーターで「満タンまで待機」に設定すると、液体が溜まるまで待機します。'},
+  {t:'発射',d:'液体を積んだロケットが目的地へ発射されます。'},
+  {t:'目的地側のパイプで排出',d:'帰還後、目的地側の発射台からパイプで液体を抜き取ります。'},
+]:[
+  {t:'Place pipes at origin',d:'Connect fluid pipes to the top/side faces to fill the cargo tank.'},
+  {t:'Set "Cargo Fluid Check" to wait until full',d:'The script waits until the tank is full before proceeding.'},
+  {t:'Launch',d:'Rocket launches with liquid cargo to the destination.'},
+  {t:'Drain at destination',d:'Pipes on the destination launchpad extract the fluid after return.'},
+])}`;
+}
+
+function renderScript(){
+  const isJa=lang==='ja';
+  return`<div class="page-title">${isJa?'スクリプトの使い方':'Script Usage'}</div>
+<p class="page-desc">${isJa?'生成したLuaスクリプトをComputerCraftのPCに保存して実行する方法です。':'How to save and run the generated Lua script on a CC:Tweaked computer.'}</p>
+<h2>${isJa?'ファイルの保存方法':'Saving the Script'}</h2>
+<h3>${isJa?'方法 A — 直接入力':'Method A — Type directly'}</h3>
+<pre>edit startup.lua</pre>
+<p>${isJa?'エディタが開くので貼り付けて Ctrl+S で保存、Ctrl+E で終了。':'Paste the code, press Ctrl+S to save, Ctrl+E to exit.'}</p>
+<h3>${isJa?'方法 B — pastebin（推奨）':'Method B — pastebin (recommended)'}</h3>
+<pre>pastebin get &lt;ID&gt; startup.lua</pre>
+<h2>${isJa?'実行方法':'Running'}</h2>
+${steps(isJa?[
+  {t:'手動実行',d:'シェルで startup と入力して Enter。'},
+  {t:'自動起動（startup.lua）',d:'ファイル名を startup.lua にするとPC起動時に自動実行。reboot で再起動。'},
+  {t:'停止方法',d:'PCを開いた状態で Ctrl+T を押すと強制終了。'},
+]:[
+  {t:'Manual',d:'Type startup in the shell and press Enter.'},
+  {t:'Auto-start (startup.lua)',d:'Name the file startup.lua to run automatically on PC boot. Use reboot to restart.'},
+  {t:'Stop',d:'Press Ctrl+T while the PC is open to terminate the program.'},
+])}
+<div class="hint">${isJa?'スロット1〜9はホッパー用インプットスロットです。マニュアルモードでは10番以降を使ってください。':'Slots 1–9 are input slots for hoppers. Use slot 10+ in Manual mode.'}</div>`;
+}
+
+function renderVisualHelp(){
+  const isJa=lang==='ja';
+  return`<div class="page-title">${isJa?'ビジュアルビルダーの使い方':'Visual Builder Guide'}</div>
+<p class="page-desc">${isJa?'ブロックをドラッグ＆ドロップしてスクリプトを組み立てる方法です。':'How to build scripts by dragging and dropping blocks.'}</p>
+<h2>${isJa?'基本操作':'Basic Operations'}</h2>
+${steps(isJa?[
+  {t:'ブロックをドラッグ',d:'左のパレットからブロックをキャンバスにドラッグします。'},
+  {t:'パラメーターを設定',d:'各ブロックの入力欄で値を変更できます。'},
+  {t:'順番を変更',d:'ブロックの▲▼ボタンで順序を入れ替えられます。キャンバス内でドラッグ&ドロップも可。'},
+  {t:'スクリプト生成',d:'「スクリプト生成」ボタンで右パネルにコードが出力されます。'},
+]:[
+  {t:'Drag a block',d:"Drag blocks from the left palette onto the canvas."},
+  {t:'Set parameters',d:"Edit values in each block's input fields."},
+  {t:'Reorder',d:'Use ▲▼ buttons or drag blocks within the canvas to reorder.'},
+  {t:'Generate',d:'Click "Generate Script" to output the code in the right panel.'},
+])}
+<div class="hint">${isJa?'「プリセット読込」ボタンで基本的な往復自動化スクリプトのブロック構成が自動で読み込まれます。v1.2.1の場合は燃料・カーゴブロックは非表示になります。':'Click "Load Preset" to auto-load a complete round-trip setup. Fuel and cargo blocks are hidden in v1.2.1 mode.'}</div>`;
+}
+
+function renderRoundtrip(){
+  const isJa=lang==='ja';
+  return`<div class="page-title">${isJa?'往復自動化':'Round Trip Automation'}</div>
+<p class="page-desc">${isJa?'2つの発射台を使って惑星間を往復輸送する方法です。':'How to automate two-way transport between planets using two launchpads.'}</p>
+<h2>${isJa?'地球側スクリプト':'Origin Script (Earth)'}</h2>
+<pre>-- Origin: Earth to Moon\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.loadAllItems()\n    lp.launch("ad_astra:moon")\n    print("[LAUNCHED] to Moon")\n  end\n  sleep(60)\nend</pre>
+<h2>${isJa?'月側スクリプト':'Destination Script (Moon)'}</h2>
+<pre>-- Destination: Moon to Earth\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.unloadAllItems()\n    sleep(5)\n    lp.loadAllItems()\n    lp.launch("minecraft:overworld")\n    print("[LAUNCHED] to Earth")\n  end\n  sleep(60)\nend</pre>
+<div class="warn-box">${isJa?'loadAllItems/unloadAllItems は v1.2.2+ のみ使用可能です。v1.2.1 では moveItemsFromLaunchPadToRocket を使用してください。':'loadAllItems/unloadAllItems require v1.2.2+. Use moveItemsFromLaunchPadToRocket for v1.2.1.'}</div>
+<div class="hint">${isJa?'帰還待機時間は目的地によって異なります。月なら30秒、火星なら60秒以上を目安にしてください。':'Return wait time varies. ~30s for Moon, ~60s+ for Mars.'}</div>`;
+}
+
+function renderTiers(){
+  const isJa=lang==='ja';
+  const tl=T[lang];
+  return`<div class="page-title">${isJa?'ロケットティア表':'Rocket Tier Table'}</div>
+<p class="page-desc">${isJa?'必要ティア = max(発射地点のティア, 目的地のティア)。':'Required tier = max(origin tier, destination tier).'}</p>
+<div class="tier-grid">
+  <div class="tier-card"><span class="tier-badge t0">Tier 0</span><div class="tier-planets">🌍 overworld</div></div>
+  <div class="tier-card"><span class="tier-badge t1">Tier 1</span><div class="tier-planets">🌍 earth_orbit ${tl.orbit_earth}<br>🌕 moon<br>🌕 moon_orbit ${tl.orbit_moon}</div></div>
+  <div class="tier-card"><span class="tier-badge t2">Tier 2</span><div class="tier-planets">🔴 mars<br>🔴 mars_orbit ${tl.orbit_mars}</div></div>
+  <div class="tier-card"><span class="tier-badge t3">Tier 3</span><div class="tier-planets">⚫ mercury<br>⚫ mercury_orbit ${tl.orbit_mercury}<br>🟡 venus<br>🟡 venus_orbit ${tl.orbit_venus}</div></div>
+  <div class="tier-card"><span class="tier-badge t4">Tier 4</span><div class="tier-planets">🧊 glacio<br>🧊 glacio_orbit ${tl.orbit_glacio}</div></div>
+</div>
+<pre>${isJa?'-- 地球 → 火星:       max(0, 2) = Tier 2\n-- 火星 → 地球:       max(2, 0) = Tier 2\n-- 月   → 地球軌道:  max(1, 1) = Tier 1':'-- Earth → Mars:        max(0, 2) = Tier 2\n-- Mars  → Earth:       max(2, 0) = Tier 2\n-- Moon  → Earth orbit: max(1, 1) = Tier 1'}</pre>`;
+}
+
+function renderApi(){
+  const isJa=lang==='ja';
+  const is111=modVer==='v121';
+  const th=isJa?['関数','戻り値','説明']:['Function','Returns','Description'];
+  const v112badge=' <span style="color:var(--amber);font-size:10px">[v1.2.2+]</span>';
+  return`<div class="page-title">${isJa?'Lua API 一覧':'Lua API Reference'}</div>
+<p class="page-desc"><code>launch_pad = peripheral.wrap("top")</code></p>
+<h2>${isJa?'発射・状態確認':'Launch & Status'}</h2>
+${apiTable([
+  {fn:'launch(planet)',ret:'—',d:isJa?'指定した惑星へロケットを発射。失敗するとエラー。':'Launch rocket to specified planet. Throws on failure.'},
+  {fn:'isRocketPresent()',ret:'boolean',d:isJa?'発射台にロケットがあれば true。':'Returns true if a rocket is on the launchpad.'},
+  {fn:'getValidDestinations()',ret:'table',d:isJa?'行ける惑星と必要ティアの一覧。':'Returns valid planets and required tiers.'},
+],th)}
+<h2>${isJa?'エネルギー':'Energy'}</h2>
+${apiTable([
+  {fn:'getEnergy()',ret:'long',d:isJa?'現在の蓄積エネルギー量（FE）。':'Current stored energy (FE).'},
+  {fn:'getMaxEnergy()',ret:'long',d:isJa?'最大エネルギー容量。':'Maximum energy capacity.'},
+  {fn:'getEnergyRequiredForLaunch()',ret:'int',d:isJa?'発射に必要なエネルギー量。':'Energy needed to launch.'},
+],th)}
+<h2>${isJa?`燃料（v1.2.2+）`:`Fuel (v1.2.2+)`}</h2>
+${is111?`<div class="warn-box">${isJa?'v1.2.1 では燃料APIは使用できません。':'Fuel API is not available in v1.2.1.'}</div>`:''}
+${apiTable([
+  {fn:'getFuel()',ret:'int',d:(isJa?'現在の燃料量（mB）。':'Current fuel amount (mB).')+v112badge},
+  {fn:'getMaxFuel()',ret:'int',d:(isJa?'最大燃料容量（mB）。':'Max fuel capacity (mB).')+v112badge},
+  {fn:'getFuelType()',ret:'string',d:(isJa?'燃料のID。空なら "empty"。':'Fluid ID of fuel, or "empty".')+v112badge},
+],th)}
+<h2>${isJa?`カーゴ流体（v1.2.2+）`:`Cargo Fluid (v1.2.2+)`}</h2>
+${is111?`<div class="warn-box">${isJa?'v1.2.1 ではカーゴ流体APIは使用できません。':'Cargo fluid API is not available in v1.2.1.'}</div>`:''}
+${apiTable([
+  {fn:'getCargoFluid()',ret:'int',d:(isJa?'カーゴ流体タンクの現在量（mB）。':'Current cargo fluid amount (mB).')+v112badge},
+  {fn:'getMaxCargoFluid()',ret:'int',d:(isJa?'カーゴ流体タンクの最大容量（mB）。':'Max cargo fluid capacity (mB).')+v112badge},
+  {fn:'getCargoFluidType()',ret:'string',d:(isJa?'カーゴ流体のID。空なら "empty"。':'Fluid ID of cargo fluid, or "empty".')+v112badge},
+],th)}
+<h2>${isJa?'インベントリ操作':'Inventory'}</h2>
+${apiTable([
+  {fn:'loadAllItems([filter])',ret:'—',d:(isJa?'発射台からロケットへ全アイテムを移動。':'Move all items from launchpad to rocket.')+v112badge},
+  {fn:'unloadAllItems([filter])',ret:'—',d:(isJa?'ロケットから発射台へ全アイテムを移動。':'Move all items from rocket to launchpad.')+v112badge},
+  {fn:'moveItemsFromLaunchPadToRocket(padSlot,rocketSlot)',ret:'—',d:isJa?'発射台スロット → ロケットスロットへ移動。':'Move item from launchpad slot to rocket slot.'},
+  {fn:'moveItemsFromRocketToLaunchPad(rocketSlot,padSlot)',ret:'—',d:isJa?'ロケットスロット → 発射台スロットへ移動。':'Move item from rocket slot to launchpad slot.'},
+  {fn:'listRocketInventory()',ret:'table|nil',d:isJa?'ロケット内のアイテム一覧。ロケットがなければ nil。':'List rocket inventory, or nil if no rocket.'},
+  {fn:'listLaunchPadInventory()',ret:'table',d:isJa?'発射台インベントリのアイテム一覧。':'List launchpad inventory.'},
+  {fn:'listLaunchPadInputSlotIndexes()',ret:'int[]',d:isJa?'ホッパー等が挿入できるスロット番号一覧。':'Slot indexes hoppers can insert into.'},
+  {fn:'listLaunchPadOutputSlotIndexes()',ret:'int[]',d:isJa?'ホッパー等が取り出せるスロット番号一覧。':'Slot indexes hoppers can extract from.'},
+],th)}`;
+}
+
+function renderExamples(){
+  const isJa=lang==='ja';
+  const is111=modVer==='v121';
+  return`<div class="page-title">${isJa?'スクリプト例':'Script Examples'}</div>
+<p class="page-desc">${isJa?'よく使うパターンのLuaスクリプト例です。':'Common Lua script patterns for reference.'}</p>
+<h2>${isJa?'① 現在の状態を全部確認':'① Check All Status'}</h2>
+<pre>local lp = peripheral.wrap("top")\nprint("Energy: " .. lp.getEnergy() .. " / " .. lp.getMaxEnergy())\nprint("Rocket: " .. tostring(lp.isRocketPresent()))\nfor planet, tier in pairs(lp.getValidDestinations()) do\n  print("  " .. planet .. " = Tier " .. tier)\nend</pre>
+${!is111?`<h2>${isJa?'② 燃料・エネルギー両方待機（v1.2.2+）':'② Wait for Both Energy and Fuel (v1.2.2+)'}</h2>
+<pre>local lp = peripheral.wrap("top")\nwhile lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\nwhile lp.getFuel() &lt; 3000 do\n  print("Fueling... " .. lp.getFuel() .. " mB")\n  sleep(5)\nend\nprint("Ready!")</pre>`:''}
+<h2>${isJa?`${is111?'②':'③'} v1.2.1 マニュアルスロット転送`:`${is111?'②':'③'} v1.2.1 Manual Slot Transfer`}</h2>
+<pre>local lp = peripheral.wrap("top")\n-- ${isJa?'スロット10番からロケットの1番へ':'Move from pad slot 10 to rocket slot 1'}\nlp.moveItemsFromLaunchPadToRocket(10, 1)\nlp.launch("ad_astra:moon")\nsleep(30)\nlp.moveItemsFromRocketToLaunchPad(1, 10)</pre>
+<h2>${isJa?'④ インベントリの中身を確認':'④ Inspect Inventory'}</h2>
+<pre>local lp = peripheral.wrap("top")\nlocal inv = lp.listRocketInventory()\nif inv then\n  for slot, item in pairs(inv) do\n    print("Slot " .. slot .. ": " .. item.name .. " x" .. item.count)\n  end\nelse\n  print("No rocket found")\nend</pre>`;
+}
+
+function renderTrouble(){
+  const isJa=lang==='ja';
+  return`<div class="page-title">${isJa?'トラブルシューティング':'Troubleshooting'}</div>
+<p class="page-desc">${isJa?'よくあるエラーと解決方法をまとめました。':'Common errors and how to fix them.'}</p>
+<h2>${isJa?'接続エラー':'Connection Errors'}</h2>
+${errCards([
+  {cls:'',t:"attempt to index global 'launch_pad' (a nil value)",b:isJa?'<strong>原因：</strong> peripheral.wrap() が未実行、またはPC再起動で変数がリセット。<br><strong>解決：</strong> スクリプト先頭に <code>local launch_pad = peripheral.wrap("top")</code> を必ず記述。':'<strong>Cause:</strong> peripheral.wrap() not called, or PC rebooted.<br><strong>Fix:</strong> Add <code>local launch_pad = peripheral.wrap("top")</code> at top of script.'},
+  {cls:'warn',t:'peripheral.getNames() only returns { "bottom" }',b:isJa?'<strong>原因：</strong> PCがモデムやHubに接続しているが発射台が認識されていない。<br><strong>解決：</strong> <code>peripheral.getType("bottom")</code> で確認。Hubを中央ブロックに繋げ直す。':'<strong>Cause:</strong> PC connected to modem/hub but launchpad not recognized.<br><strong>Fix:</strong> Run <code>peripheral.getType("bottom")</code>. Reconnect hub to central block.'},
+  {cls:'',t:"attempt to call field 'isRocketPresent' (a nil value)",b:isJa?'<strong>原因：</strong> PCが発射台の外周ブロックに接続している。<br><strong>解決：</strong> PCまたはHubを中央ブロックに隣接させる。':'<strong>Cause:</strong> PC connected to outer block, not central block.<br><strong>Fix:</strong> Move PC or Hub to be adjacent to the central block.'},
+])}
+<h2>${isJa?'発射エラー':'Launch Errors'}</h2>
+${errCards([
+  {cls:'',t:'No rocket found',b:isJa?'<strong>原因：</strong> 発射台にロケットがない。<br><strong>解決：</strong> ロケットを発射台の中央ブロックに設置する。':'<strong>Cause:</strong> No rocket on launchpad.<br><strong>Fix:</strong> Place rocket on the central block.'},
+  {cls:'',t:'Not enough energy to launch',b:isJa?'<strong>原因：</strong> エネルギー不足（通常 500,000 FE 必要）。<br><strong>解決：</strong> 発電機で供給。<code>launch_pad.getEnergy()</code> で確認。':'<strong>Cause:</strong> Insufficient energy (500,000 FE needed).<br><strong>Fix:</strong> Supply energy. Check with <code>launch_pad.getEnergy()</code>.'},
+  {cls:'',t:'Not enough fuel to launch',b:isJa?'<strong>原因：</strong> 燃料不足（3000 mB 必要）。<br><strong>解決：</strong> 発射台の底面にパイプで供給、またはバケツで右クリック。':'<strong>Cause:</strong> Fuel tank empty (3000 mB needed).<br><strong>Fix:</strong> Connect fuel pipe to BOTTOM face, or right-click with fuel bucket.'},
+  {cls:'',t:'<planet> is too high of a tier for this rocket',b:isJa?'<strong>原因：</strong> ロケットのティアが目的地に対して不足。<br><strong>解決：</strong> 高ティアのロケットを使用する。':'<strong>Cause:</strong> Rocket tier too low for destination.<br><strong>Fix:</strong> Use a higher tier rocket.'},
+  {cls:'warn',t:'<planet> is not a valid planet',b:isJa?'<strong>原因：</strong> 惑星IDのタイポ。<br><strong>解決：</strong> <code>launch_pad.getValidDestinations()</code> で正しいIDを確認。':'<strong>Cause:</strong> Typo in planet ID.<br><strong>Fix:</strong> Check correct IDs with <code>launch_pad.getValidDestinations()</code>.'},
+])}
+<h2>${isJa?'よくある質問':'FAQ'}</h2>
+${errCards([
+  {cls:'ok',t:isJa?'スロット1〜9にアイテムを入れたのにロケットに積まれない':'Items in slots 1–9 do not load into rocket',b:isJa?'スロット1〜9はホッパー用インプットスロット。マニュアルモードでは10番以降を使ってください。':'Slots 1–9 are hopper input slots. Use slot 10+ in Manual mode.'},
+  {cls:'ok',t:isJa?'スクリプトを止めたい':'How to stop the script',b:isJa?'PCを開いた状態で Ctrl+T を押すと強制終了。':'Press Ctrl+T while the PC is open.'},
+  {cls:'ok',t:isJa?'v1.2.1 で loadAllItems が使えない':'loadAllItems not available in v1.2.1',b:isJa?'loadAllItems は v1.2.2+ の機能です。v1.2.1 では moveItemsFromLaunchPadToRocket でスロットを個別に指定してください。':'loadAllItems is a v1.2.2+ feature. Use moveItemsFromLaunchPadToRocket with individual slot numbers for v1.2.1.'},
+  {cls:'ok',t:isJa?'再起動したらスクリプトが動かない':'Script does not run after reboot',b:isJa?'ファイル名を startup.lua にすることでPC起動時に自動実行されます。':'Name the file startup.lua for auto-run on boot.'},
+])}`;
+}
+
+
+// ============================================================
+// INIT
+// ============================================================
+renderHelp('setup');
+applyVer();
+initCanvasDrop();
 </script>
 </body>
 </html>
