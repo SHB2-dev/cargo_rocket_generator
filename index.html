@@ -219,6 +219,13 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
       <div class="section">
         <div class="section-label" data-i18n="sec_basic">Basic Settings</div>
         <div class="field">
+          <label data-i18n="lbl_roundtrip">Script Type <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_roundtrip">One-way: single launchpad sends items one direction. Round-trip: generates scripts for BOTH ends so the rocket returns automatically.</div></span></label>
+          <select id="roundTrip" onchange="toggleRoundTrip()">
+            <option value="oneway" data-i18n="rt_oneway">One-way (single script)</option>
+            <option value="roundtrip" data-i18n="rt_roundtrip">Round-trip (origin + destination)</option>
+          </select>
+        </div>
+        <div class="field">
           <label data-i18n="lbl_pad">Peripheral Name <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_pad">Direction or device name seen from the PC. Check with peripheral.getNames(). e.g. top, bottom, left</div></span></label>
           <input type="text" id="padName" value="top" data-i18n-placeholder="ph_pad">
         </div>
@@ -330,7 +337,7 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
     </div>
     <div class="output-panel">
       <div class="output-header">
-        <span class="output-title">// startup.lua</span>
+        <span class="output-title" id="outputTitle1">// startup.lua (Origin)</span>
         <div class="output-actions">
           <button class="icon-btn" id="copyBtn" onclick="copyCode()" data-i18n="btn_copy">📋 Copy</button>
           <button class="icon-btn" onclick="downloadCode()" data-i18n="btn_dl">💾 Download</button>
@@ -344,6 +351,18 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
       <div class="code-area">
         <div class="placeholder" id="placeholder"><div class="icon">📄</div><p data-i18n="placeholder_text">Configure settings and generate your script</p></div>
         <pre id="codeBlock" style="display:none"></pre>
+      </div>
+      <div id="destOutputBlock" style="display:none">
+        <div class="output-header" style="margin-top:1rem">
+          <span class="output-title" id="outputTitle2">// startup.lua (Destination)</span>
+          <div class="output-actions">
+            <button class="icon-btn" id="copyBtn2" onclick="copyCode2()" data-i18n="btn_copy">📋 Copy</button>
+            <button class="icon-btn" onclick="downloadCode2()" data-i18n="btn_dl">💾 Download</button>
+          </div>
+        </div>
+        <div class="code-area">
+          <pre id="codeBlock2"></pre>
+        </div>
       </div>
     </div>
   </div>
@@ -444,6 +463,8 @@ const T={
 en:{
   tab_gen:"⚙️ Generator",tab_vis:"🧩 Visual",tab_help:"📖 HELP",
   sec_basic:"Basic Settings",sec_transfer:"Transfer Mode",
+  lbl_roundtrip:"Script Type",tip_roundtrip:"One-way: single launchpad sends items one direction. Round-trip: generates scripts for BOTH ends so the rocket returns automatically.",
+  rt_oneway:"One-way (single script)",rt_roundtrip:"Round-trip (origin + destination)",
   lbl_pad:"Peripheral Name",tip_pad:"Direction or device name seen from the PC. Check with peripheral.getNames(). e.g. top, bottom, left",ph_pad:"top / bottom / cargo_rocket_launch_pad_0",
   lbl_origin:"Launch Origin",tip_origin:"The planet the rocket is currently on. Required tier = max(origin tier, destination tier).",
   lbl_dest:"Destination",tip_dest:"Target planet. Check with launch_pad.getValidDestinations().",
@@ -482,6 +503,8 @@ en:{
 ja:{
   tab_gen:"⚙️ ジェネレーター",tab_vis:"🧩 ビジュアル",tab_help:"📖 HELP",
   sec_basic:"基本設定",sec_transfer:"転送モード",
+  lbl_roundtrip:"スクリプトの種類",tip_roundtrip:"片道：1つの発射台のみで一方向に送る。往復：発射地点と目的地、両方のスクリプトを生成し、ロケットが自動で戻ってくるようにします。",
+  rt_oneway:"片道（単一スクリプト）",rt_roundtrip:"往復（発射地点＋目的地）",
   lbl_pad:"ペリフェラル名",tip_pad:"PCから見た発射台の方向名またはデバイス名。peripheral.getNames() で確認。例: top, bottom, left",ph_pad:"top / bottom / cargo_rocket_launch_pad_0",
   lbl_origin:"発射地点（現在地）",tip_origin:"ロケットが現在いる惑星。必要ティア = max(発射地点, 目的地)。",
   lbl_dest:"目的地",tip_dest:"目標の惑星。launch_pad.getValidDestinations() で確認できます。",
@@ -567,7 +590,7 @@ function hl(code){return code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 // GENERATE
 // ============================================================
 function buildCode(cfg){
-  const{pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine}=cfg;
+  const{pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination}=cfg;
   let fuelBlock='';
   if(fuelCheck==='wait'){fuelBlock=`\n  -- Wait for fuel\n  while true do\n    local fuel = launch_pad.getFuel()\n    print("[FUEL] " .. fuel .. " / ${minFuel} mB")\n    if fuel >= ${minFuel} then print("[OK] Fuel ready") break end\n    sleep(ENERGY_INTERVAL)\n  end\n`;}
   else if(fuelCheck==='warn'){fuelBlock=`\n  local fuel = launch_pad.getFuel()\n  if fuel < ${minFuel} then print("[WARN] Low fuel: " .. fuel .. " mB") else print("[OK] Fuel: " .. fuel .. " mB") end\n`;}
@@ -575,8 +598,12 @@ function buildCode(cfg){
   if(cargoCheck==='log'){cargoBlock=`\n      print("[CARGO] " .. launch_pad.getCargoFluidType() .. " : " .. launch_pad.getCargoFluid() .. " mB")`;}
   else if(cargoCheck==='wait_fill'){cargoBlock=`\n      while true do\n        local cf=launch_pad.getCargoFluid()\n        local target=${cargoThreshold}>0 and ${cargoThreshold} or launch_pad.getMaxCargoFluid()\n        print("[CARGO] " .. cf .. "/" .. target .. " mB")\n        if cf>=target then print("[OK] Cargo ready") break end\n        sleep(ENERGY_INTERVAL)\n      end`;}
   else if(cargoCheck==='wait_empty'){cargoBlock=`\n      while true do\n        local cf=launch_pad.getCargoFluid()\n        print("[CARGO] draining: " .. cf .. " mB")\n        if cf<=${cargoThreshold} then print("[OK] Cargo drained") break end\n        sleep(ENERGY_INTERVAL)\n      end`;}
+  const roleLabel=isDestination?'Destination':'Origin';
+  // Safety: wait for the rocket to actually be present before unloading,
+  // instead of assuming RETURN_WAIT was long enough (fixes "No rocket found").
+  const waitForReturnBlock=`      print("[FLIGHT] Waiting " .. RETURN_WAIT .. " sec (minimum)...")\n      sleep(RETURN_WAIT)\n      print("[FLIGHT] Confirming rocket has returned...")\n      while not launch_pad.isRocketPresent() do\n        print("[FLIGHT] Still waiting for rocket to return...")\n        sleep(ENERGY_INTERVAL)\n      end`;
   return `-- ============================================
--- Cargo Rocket Automation Script
+-- Cargo Rocket Automation Script (${roleLabel})
 -- Ad Astra + CC:Tweaked
 -- ============================================
 
@@ -589,7 +616,7 @@ local MIN_FUEL        = ${minFuel}
 local launch_pad = peripheral.wrap(PERIPHERAL)
 if not launch_pad then error("Launch pad not found: " .. PERIPHERAL) end
 
-print("[BOOT] Cargo Rocket automation started")
+print("[BOOT] Cargo Rocket automation started (${roleLabel})")
 print("[INFO] Destination: " .. PLANET)
 
 while true do
@@ -615,8 +642,7 @@ ${loadLine}
       print("[ERROR] " .. tostring(err))
       sleep(ENERGY_INTERVAL)
     else
-      print("[FLIGHT] Waiting " .. RETURN_WAIT .. " sec...")
-      sleep(RETURN_WAIT)
+${waitForReturnBlock}
       print("[UNLOAD] Retrieving items...")
 ${unloadLine}${cargoBlock}
       print("[DONE] Cycle complete.")
@@ -629,16 +655,19 @@ end`;
 function generate(){
   const pad=document.getElementById('padName').value.trim()||'top';
   const planet=document.getElementById('planet').value||'minecraft:overworld';
+  const origin=document.getElementById('origin').value||'minecraft:overworld';
   const interval=parseInt(document.getElementById('energyInterval').value)||5;
   const returnWait=parseInt(document.getElementById('returnWait').value)||30;
   const fuelCheck=modVer==='v122'?document.getElementById('fuelCheck').value:'none';
   const minFuel=parseInt(document.getElementById('minFuel').value)||3000;
   const cargoCheck=modVer==='v122'?document.getElementById('cargoCheck').value:'none';
   const cargoThreshold=parseInt(document.getElementById('cargoThreshold').value)||0;
+  const isRoundTrip=document.getElementById('roundTrip').value==='roundtrip';
   let loadLine,unloadLine;
   if(currentMode==='simple'&&modVer==='v122'){const lf=document.getElementById('loadFilter').value.trim();const uf=document.getElementById('unloadFilter').value.trim();loadLine=lf?`  launch_pad.loadAllItems("${lf}")`:`  launch_pad.loadAllItems()`;unloadLine=uf?`  launch_pad.unloadAllItems("${uf}")`:`  launch_pad.unloadAllItems()`;}
   else{const loads=[...document.querySelectorAll('#loadSlots .slot-item')].map(r=>({ps:r.querySelector('.ps').value,rs:r.querySelector('.rs').value}));const unloads=[...document.querySelectorAll('#unloadSlots .slot-item')].map(r=>({rs:r.querySelector('.rs').value,ps:r.querySelector('.ps').value}));loadLine=loads.length?loads.map(s=>`  launch_pad.moveItemsFromLaunchPadToRocket(${s.ps},${s.rs})`).join('\n'):'  -- no load slots';unloadLine=unloads.length?unloads.map(s=>`  launch_pad.moveItemsFromRocketToLaunchPad(${s.rs},${s.ps})`).join('\n'):'  -- no unload slots';}
-  const code=buildCode({pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine});
+
+  const code=buildCode({pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination:false});
   window._code=code;
   document.getElementById('placeholder').style.display='none';
   const block=document.getElementById('codeBlock');block.style.display='block';block.innerHTML=hl(code);
@@ -646,9 +675,31 @@ function generate(){
   document.getElementById('statLines').textContent=code.split('\n').length;
   document.getElementById('statMode').textContent=currentMode==='simple'?'Simple':'Manual';
   document.getElementById('statFuel').textContent=fuelCheck==='none'?'OFF':fuelCheck==='wait'?'WAIT':'WARN';
+
+  const destBlockEl=document.getElementById('destOutputBlock');
+  if(isRoundTrip){
+    document.getElementById('outputTitle1').textContent=`// startup.lua (${origin})`;
+    document.getElementById('outputTitle2').textContent=`// startup.lua (${planet})`;
+    // Destination script launches back to the origin
+    const code2=buildCode({pad,planet:origin,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination:true});
+    window._code2=code2;
+    const block2=document.getElementById('codeBlock2');block2.innerHTML=hl(code2);
+    destBlockEl.style.display='block';
+  } else {
+    document.getElementById('outputTitle1').textContent='// startup.lua';
+    destBlockEl.style.display='none';
+    window._code2=null;
+  }
 }
 function copyCode(){if(!window._code)return;navigator.clipboard.writeText(window._code).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=T[lang].btn_copied;btn.classList.add('success');setTimeout(()=>{btn.textContent=T[lang].btn_copy;btn.classList.remove('success');},2000);});}
 function downloadCode(){if(!window._code)return;const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(window._code);a.download='startup.lua';a.click();}
+function copyCode2(){if(!window._code2)return;navigator.clipboard.writeText(window._code2).then(()=>{const btn=document.getElementById('copyBtn2');btn.textContent=T[lang].btn_copied;btn.classList.add('success');setTimeout(()=>{btn.textContent=T[lang].btn_copy;btn.classList.remove('success');},2000);});}
+function downloadCode2(){if(!window._code2)return;const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(window._code2);a.download='startup_destination.lua';a.click();}
+function toggleRoundTrip(){
+  const isRT=document.getElementById('roundTrip').value==='roundtrip';
+  // No structural change needed up front; just regenerate hint via destOutputBlock visibility on next generate()
+  if(!isRT){document.getElementById('destOutputBlock').style.display='none';}
+}
 
 // ============================================================
 // VISUAL BUILDER
@@ -992,12 +1043,13 @@ function renderRoundtrip(){
   const isJa=lang==='ja';
   return`<div class="page-title">${isJa?'往復自動化':'Round Trip Automation'}</div>
 <p class="page-desc">${isJa?'2つの発射台を使って惑星間を往復輸送する方法です。':'How to automate two-way transport between planets using two launchpads.'}</p>
-<h2>${isJa?'地球側スクリプト':'Origin Script (Earth)'}</h2>
-<pre>-- Origin: Earth to Moon\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.loadAllItems()\n    lp.launch("ad_astra:moon")\n    print("[LAUNCHED] to Moon")\n  end\n  sleep(60)\nend</pre>
-<h2>${isJa?'月側スクリプト':'Destination Script (Moon)'}</h2>
-<pre>-- Destination: Moon to Earth\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.unloadAllItems()\n    sleep(5)\n    lp.loadAllItems()\n    lp.launch("minecraft:overworld")\n    print("[LAUNCHED] to Earth")\n  end\n  sleep(60)\nend</pre>
-<div class="warn-box">${isJa?'loadAllItems/unloadAllItems は v1.2.2+ のみ使用可能です。v1.2.1 では moveItemsFromLaunchPadToRocket を使用してください。':'loadAllItems/unloadAllItems require v1.2.2+. Use moveItemsFromLaunchPadToRocket for v1.2.1.'}</div>
-<div class="hint">${isJa?'帰還待機時間は目的地によって異なります。月なら30秒、火星なら60秒以上を目安にしてください。':'Return wait time varies. ~30s for Moon, ~60s+ for Mars.'}</div>`;
+<div class="hint">${isJa?'ジェネレータータブの「スクリプトの種類」を「往復」に切り替えると、発射地点・目的地両方のスクリプトを自動生成できます。手動で書く必要はありません。':'Switch "Script Type" to "Round-trip" in the Generator tab to auto-generate scripts for both ends — no manual writing needed.'}</div>
+<h2>${isJa?'地球側スクリプト（例）':'Origin Script Example (Earth)'}</h2>
+<pre>-- Origin: Earth to Moon\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.loadAllItems()\n    lp.launch("ad_astra:moon")\n    print("[LAUNCHED] to Moon")\n    sleep(30)\n    while not lp.isRocketPresent() do sleep(5) end\n  end\nend</pre>
+<h2>${isJa?'月側スクリプト（例）':'Destination Script Example (Moon)'}</h2>
+<pre>-- Destination: Moon to Earth\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.unloadAllItems()\n    sleep(5)\n    lp.loadAllItems()\n    lp.launch("minecraft:overworld")\n    print("[LAUNCHED] to Earth")\n    sleep(30)\n    while not lp.isRocketPresent() do sleep(5) end\n  end\nend</pre>
+<div class="warn-box">${isJa?'loadAllItems/unloadAllItems は v1.2.2+ のみ使用可能です。v1.2.1 では moveItemsFromLaunchPadToRocket を使用してください（ジェネレーターのマニュアルモードで自動対応）。':'loadAllItems/unloadAllItems require v1.2.2+. For v1.2.1, moveItemsFromLaunchPadToRocket is used automatically when Manual mode is selected.'}</div>
+<div class="hint">${isJa?'「帰還待機時間」は最低待機時間として使われ、その後 isRocketPresent() で実際の帰還を確認するので "No rocket found" エラーを防げます。':'"Return Wait" is used as a minimum wait, after which isRocketPresent() confirms the actual return — this prevents "No rocket found" errors.'}</div>`;
 }
 
 function renderTiers(){
