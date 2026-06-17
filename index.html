@@ -592,7 +592,7 @@ function applyTranslations(){
   document.querySelectorAll('.tip-box[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(t[k])el.textContent=t[k];});
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.dataset.i18nPlaceholder;if(t[k])el.placeholder=t[k];});
   document.querySelectorAll('option[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(t[k])el.textContent=t[k];});
-  document.querySelectorAll('option[data-i18n-suffix]').forEach(el=>{const k=el.dataset.i18nSuffix;if(t[k]){const icon=el.textContent.trim().charAt(0)+' ';const dash=el.textContent.includes('—')?' — '+el.textContent.split('—')[1].trim():'';el.textContent=icon+el.value+dash+' '+t[k];}});
+  document.querySelectorAll('option[data-i18n-suffix]').forEach(el=>{const k=el.dataset.i18nSuffix;if(t[k]){const icon=Array.from(el.textContent.trim())[0]+' ';const dash=el.textContent.includes('—')?' — '+el.textContent.split('—')[1].trim():'';el.textContent=icon+el.value+dash+' '+t[k];}});
   const tl=document.querySelector('#tierResult span');if(tl)tl.textContent=t.tier_label;
   if(document.getElementById('tierResult').style.display!=='none')calcTier();
   renderVisualBlocks();
