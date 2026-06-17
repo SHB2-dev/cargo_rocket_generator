@@ -226,6 +226,30 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
             <option value="roundtrip" data-i18n="rt_roundtrip">Round-trip (origin + destination)</option>
           </select>
         </div>
+        <div class="field" id="roundTripDirField" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 11px;">
+          <label style="margin-bottom:8px;" data-i18n="lbl_rtdir">Per-Direction Cargo <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_rtdir">Choose whether items and cargo fluid are loaded at each end. Useful when cargo should only flow one way.</div></span></label>
+          <div class="row2" style="margin-bottom:6px;">
+            <div>
+              <div style="font-size:10px;color:var(--accent2);font-family:var(--mono);margin-bottom:4px;" data-i18n="rtdir_origin_hdr">Origin →</div>
+              <label style="display:flex;align-items:center;gap:5px;font-size:11px;margin-bottom:5px;cursor:pointer;">
+                <input type="checkbox" id="originLoadItems" checked style="width:auto;"> <span data-i18n="rtdir_loaditems">Load items</span>
+              </label>
+              <label class="v112-only" style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+                <input type="checkbox" id="originLoadCargo" checked style="width:auto;"> <span data-i18n="rtdir_loadcargo">Load cargo fluid</span>
+              </label>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--accent2);font-family:var(--mono);margin-bottom:4px;" data-i18n="rtdir_dest_hdr">Destination →</div>
+              <label style="display:flex;align-items:center;gap:5px;font-size:11px;margin-bottom:5px;cursor:pointer;">
+                <input type="checkbox" id="destLoadItems" checked style="width:auto;"> <span data-i18n="rtdir_loaditems">Load items</span>
+              </label>
+              <label class="v112-only" style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+                <input type="checkbox" id="destLoadCargo" checked style="width:auto;"> <span data-i18n="rtdir_loadcargo">Load cargo fluid</span>
+              </label>
+            </div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.5;" data-i18n="rtdir_note">Unchecking "Load" still unloads/drains at that end — it only skips loading new cargo before launch.</div>
+        </div>
         <div class="field">
           <label data-i18n="lbl_pad">Peripheral Name <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_pad">Direction or device name seen from the PC. Check with peripheral.getNames(). e.g. top, bottom, left</div></span></label>
           <input type="text" id="padName" value="top" data-i18n-placeholder="ph_pad">
@@ -466,6 +490,9 @@ en:{
   sec_basic:"Basic Settings",sec_transfer:"Transfer Mode",
   lbl_roundtrip:"Script Type",tip_roundtrip:"One-way: single launchpad sends items one direction. Round-trip: generates scripts for BOTH ends so the rocket returns automatically.",
   rt_oneway:"One-way (single script)",rt_roundtrip:"Round-trip (origin + destination)",
+  lbl_rtdir:"Per-Direction Cargo",tip_rtdir:"Choose whether items and cargo fluid are loaded at each end. Useful when cargo should only flow one way.",
+  rtdir_origin_hdr:"Origin →",rtdir_dest_hdr:"Destination →",rtdir_loaditems:"Load items",rtdir_loadcargo:"Load cargo fluid",
+  rtdir_note:"Unchecking \"Load\" still unloads/drains at that end — it only skips loading new cargo before launch.",
   lbl_pad:"Peripheral Name",tip_pad:"Direction or device name seen from the PC. Check with peripheral.getNames(). e.g. top, bottom, left",ph_pad:"top / bottom / cargo_rocket_launch_pad_0",
   lbl_origin:"Launch Origin",tip_origin:"The planet the rocket is currently on. Required tier = max(origin tier, destination tier).",
   lbl_dest:"Destination",tip_dest:"Target planet. Check with launch_pad.getValidDestinations().",
@@ -506,6 +533,9 @@ ja:{
   sec_basic:"基本設定",sec_transfer:"転送モード",
   lbl_roundtrip:"スクリプトの種類",tip_roundtrip:"片道：1つの発射台のみで一方向に送る。往復：発射地点と目的地、両方のスクリプトを生成し、ロケットが自動で戻ってくるようにします。",
   rt_oneway:"片道（単一スクリプト）",rt_roundtrip:"往復（発射地点＋目的地）",
+  lbl_rtdir:"方向ごとの積み込み設定",tip_rtdir:"発射地点・目的地それぞれでアイテムとカーゴ流体を積むかどうかを選べます。片方向だけ輸送したい場合に便利です。",
+  rtdir_origin_hdr:"発射地点 →",rtdir_dest_hdr:"目的地 →",rtdir_loaditems:"アイテムを積む",rtdir_loadcargo:"カーゴ流体を積む",
+  rtdir_note:"「積む」のチェックを外しても、その場所での降ろし・排出は行われます。発射前に新たに積み込む処理だけスキップされます。",
   lbl_pad:"ペリフェラル名",tip_pad:"PCから見た発射台の方向名またはデバイス名。peripheral.getNames() で確認。例: top, bottom, left",ph_pad:"top / bottom / cargo_rocket_launch_pad_0",
   lbl_origin:"発射地点（現在地）",tip_origin:"ロケットが現在いる惑星。必要ティア = max(発射地点, 目的地)。",
   lbl_dest:"目的地",tip_dest:"目標の惑星。launch_pad.getValidDestinations() で確認できます。",
@@ -592,17 +622,25 @@ function hl(code){return code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 // ============================================================
 function buildCode(cfg){
   const{pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination}=cfg;
+  const loadItems=cfg.loadItems!==false;
+  const loadCargo=cfg.loadCargo!==false;
   let fuelBlock='';
   if(fuelCheck==='wait'){fuelBlock=`\n  -- Wait for fuel\n  while true do\n    local fuel = launch_pad.getFuel()\n    print("[FUEL] " .. fuel .. " / ${minFuel} mB")\n    if fuel >= ${minFuel} then print("[OK] Fuel ready") break end\n    sleep(ENERGY_INTERVAL)\n  end\n`;}
   else if(fuelCheck==='warn'){fuelBlock=`\n  local fuel = launch_pad.getFuel()\n  if fuel < ${minFuel} then print("[WARN] Low fuel: " .. fuel .. " mB") else print("[OK] Fuel: " .. fuel .. " mB") end\n`;}
+  // Pre-launch cargo fluid wait (only relevant when this end is expected to load cargo)
+  let preCargoBlock='';
+  if(loadCargo&&cargoCheck==='wait_fill'){preCargoBlock=`\n    -- Wait for cargo fluid to be loaded\n    while true do\n      local cf=launch_pad.getCargoFluid()\n      local target=${cargoThreshold}>0 and ${cargoThreshold} or launch_pad.getMaxCargoFluid()\n      print("[CARGO] " .. cf .. "/" .. target .. " mB")\n      if cf>=target then print("[OK] Cargo ready") break end\n      sleep(ENERGY_INTERVAL)\n    end`;}
+  // Post-return cargo fluid handling (log or wait until drained)
   let cargoBlock='';
   if(cargoCheck==='log'){cargoBlock=`\n      print("[CARGO] " .. launch_pad.getCargoFluidType() .. " : " .. launch_pad.getCargoFluid() .. " mB")`;}
-  else if(cargoCheck==='wait_fill'){cargoBlock=`\n      while true do\n        local cf=launch_pad.getCargoFluid()\n        local target=${cargoThreshold}>0 and ${cargoThreshold} or launch_pad.getMaxCargoFluid()\n        print("[CARGO] " .. cf .. "/" .. target .. " mB")\n        if cf>=target then print("[OK] Cargo ready") break end\n        sleep(ENERGY_INTERVAL)\n      end`;}
   else if(cargoCheck==='wait_empty'){cargoBlock=`\n      while true do\n        local cf=launch_pad.getCargoFluid()\n        print("[CARGO] draining: " .. cf .. " mB")\n        if cf<=${cargoThreshold} then print("[OK] Cargo drained") break end\n        sleep(ENERGY_INTERVAL)\n      end`;}
   const roleLabel=isDestination?'Destination':'Origin';
   // Safety: wait for the rocket to actually be present before unloading,
   // instead of assuming RETURN_WAIT was long enough (fixes "No rocket found").
   const waitForReturnBlock=`      print("[FLIGHT] Waiting " .. RETURN_WAIT .. " sec (minimum)...")\n      sleep(RETURN_WAIT)\n      print("[FLIGHT] Confirming rocket has returned...")\n      while not launch_pad.isRocketPresent() do\n        print("[FLIGHT] Still waiting for rocket to return...")\n        sleep(ENERGY_INTERVAL)\n      end`;
+  const loadStep=loadItems
+    ? `    print("[LOAD] Moving items to rocket...")\n${loadLine}`
+    : `    print("[LOAD] Skipping item load at this end (disabled)")`;
   return `-- ============================================
 -- Cargo Rocket Automation Script (${roleLabel})
 -- Ad Astra + CC:Tweaked
@@ -635,8 +673,7 @@ ${fuelBlock}
     print("[WARN] No rocket. Waiting...")
     sleep(ENERGY_INTERVAL)
   else
-    print("[LOAD] Moving items to rocket...")
-${loadLine}
+${loadStep}${preCargoBlock}
     print("[LAUNCH] Launching to " .. PLANET)
     local ok, err = pcall(function() launch_pad.launch(PLANET) end)
     if not ok then
@@ -664,11 +701,16 @@ function generate(){
   const cargoCheck=modVer==='v122'?document.getElementById('cargoCheck').value:'none';
   const cargoThreshold=parseInt(document.getElementById('cargoThreshold').value)||0;
   const isRoundTrip=document.getElementById('roundTrip').value==='roundtrip';
+  // Per-direction load toggles (only meaningful for round-trip; one-way always loads)
+  const originLoadItems=isRoundTrip?document.getElementById('originLoadItems').checked:true;
+  const originLoadCargo=isRoundTrip&&modVer==='v122'?document.getElementById('originLoadCargo').checked:true;
+  const destLoadItems=isRoundTrip?document.getElementById('destLoadItems').checked:true;
+  const destLoadCargo=isRoundTrip&&modVer==='v122'?document.getElementById('destLoadCargo').checked:true;
   let loadLine,unloadLine;
   if(currentMode==='simple'&&modVer==='v122'){const lf=document.getElementById('loadFilter').value.trim();const uf=document.getElementById('unloadFilter').value.trim();loadLine=lf?`  launch_pad.loadAllItems("${lf}")`:`  launch_pad.loadAllItems()`;unloadLine=uf?`  launch_pad.unloadAllItems("${uf}")`:`  launch_pad.unloadAllItems()`;}
   else{const loads=[...document.querySelectorAll('#loadSlots .slot-item')].map(r=>({ps:r.querySelector('.ps').value,rs:r.querySelector('.rs').value}));const unloads=[...document.querySelectorAll('#unloadSlots .slot-item')].map(r=>({rs:r.querySelector('.rs').value,ps:r.querySelector('.ps').value}));loadLine=loads.length?loads.map(s=>`  launch_pad.moveItemsFromLaunchPadToRocket(${s.ps},${s.rs})`).join('\n'):'  -- no load slots';unloadLine=unloads.length?unloads.map(s=>`  launch_pad.moveItemsFromRocketToLaunchPad(${s.rs},${s.ps})`).join('\n'):'  -- no unload slots';}
 
-  const code=buildCode({pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination:false});
+  const code=buildCode({pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination:false,loadItems:originLoadItems,loadCargo:originLoadCargo});
   window._code=code;
   document.getElementById('placeholder').style.display='none';
   const block=document.getElementById('codeBlock');block.style.display='block';block.innerHTML=hl(code);
@@ -682,7 +724,7 @@ function generate(){
     document.getElementById('outputTitle1').textContent=`// startup.lua (${origin})`;
     document.getElementById('outputTitle2').textContent=`// startup.lua (${planet})`;
     // Destination script launches back to the origin
-    const code2=buildCode({pad,planet:origin,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination:true});
+    const code2=buildCode({pad,planet:origin,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination:true,loadItems:destLoadItems,loadCargo:destLoadCargo});
     window._code2=code2;
     const block2=document.getElementById('codeBlock2');block2.innerHTML=hl(code2);
     destBlockEl.style.display='block';
@@ -698,7 +740,7 @@ function copyCode2(){if(!window._code2)return;navigator.clipboard.writeText(wind
 function downloadCode2(){if(!window._code2)return;const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(window._code2);a.download='startup_destination.lua';a.click();}
 function toggleRoundTrip(){
   const isRT=document.getElementById('roundTrip').value==='roundtrip';
-  // No structural change needed up front; just regenerate hint via destOutputBlock visibility on next generate()
+  document.getElementById('roundTripDirField').style.display=isRT?'block':'none';
   if(!isRT){document.getElementById('destOutputBlock').style.display='none';}
 }
 
@@ -787,7 +829,8 @@ function renderVisualBlocks(){
         const opts=p.opts.map(o=>`<option value="${o}"${blk.params[p.key]===o?' selected':''}>${t['cargomode_'+o]||t['fuelmode_'+o]||o}</option>`).join('');
         paramsHtml+=`<div class="cb-param"><span>${lbl}:</span><select onchange="vbBlocks[${i}].params['${p.key}']=this.value">${opts}</select></div>`;
       } else {
-        paramsHtml+=`<div class="cb-param"><span>${lbl}:</span><input type="${p.type}" value="${blk.params[p.key]}" onchange="vbBlocks[${i}].params['${p.key}']=this.${p.type==='number'?'value':'value'}"></div>`;
+        const inputType=p.type==='number'?'number':'text';
+        paramsHtml+=`<div class="cb-param"><span>${lbl}:</span><input type="${inputType}" value="${blk.params[p.key]}" onchange="vbBlocks[${i}].params['${p.key}']=${p.type==='number'?'(parseFloat(this.value)||0)':'this.value'}"></div>`;
       }
     });
     div.innerHTML=`
@@ -802,18 +845,6 @@ function renderVisualBlocks(){
       </div>
       <button class="cb-del" onclick="removeBlock(${i})">×</button>`;
     area.appendChild(div);
-  });
-  // キャンバス空白部ドロップを再登録
-  area.addEventListener('dragover',e=>{e.preventDefault();});
-  area.addEventListener('drop',e=>{
-    e.preventDefault();
-    if((e.target===area)&&dragSrcType!==null&&dragSrcIdx===null){
-      const def=BLOCK_DEFS[dragSrcType];if(!def){dragSrcType=null;return;}
-      const params={};def.params.forEach(p=>params[p.key]=p.def);
-      vbBlocks.push({type:dragSrcType,params});
-      renderVisualBlocks();
-    }
-    dragSrcType=null;dragSrcIdx=null;
   });
 }
 function moveBlock(i,dir){const ni=i+dir;if(ni<0||ni>=vbBlocks.length)return;[vbBlocks[i],vbBlocks[ni]]=[vbBlocks[ni],vbBlocks[i]];renderVisualBlocks();}
