@@ -790,12 +790,34 @@ ${loadStep}${preCargoBlock}${clearStatusLine}
     print("[LAUNCH] Launching to " .. PLANET)
     local ok, err = pcall(function() launch_pad.launch(PLANET) end)
     if not ok then
-      print("[ERROR] " .. tostring(err))
+      print("[ERROR] " .. tostring(err))${setStatus('"Error: " .. tostring(err)', '      ')}
       sleep(ENERGY_INTERVAL)
     else
 ${waitForReturnBlock}
       print("[UNLOAD] Retrieving items...")
-${unloadLine}${cargoBlock}
+${unloadLine}
+      -- Verify the rocket is actually empty before continuing. unloadAllItems can
+      -- silently leave items behind if the launchpad's output slots are full, which
+      -- would otherwise cause those items to be re-launched on the next cycle.
+      do
+        local unloadRetries = 0
+        while true do
+          local inv = launch_pad.listRocketInventory()
+          local stillHasItems = false
+          if inv then
+            for slot, it in pairs(inv) do stillHasItems = true break end
+          end
+          if not stillHasItems then break end
+          unloadRetries = unloadRetries + 1
+          if unloadRetries > 20 then
+            print("[WARN] Could not fully unload rocket after 20 retries. Output slots may be full.")${setStatus('"WARNING: output slots full, items stuck in rocket"', '            ')}
+            break
+          end
+          print("[UNLOAD] Items remaining, retrying (output slots may be full)...")${setStatus('"Unloading: retry " .. unloadRetries .. "/20 (output may be full)"', '          ')}
+${unloadLine}
+          sleep(ENERGY_INTERVAL)
+        end
+      end${cargoBlock}
       print("[DONE] Cycle complete.")
     end
   end
