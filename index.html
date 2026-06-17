@@ -175,7 +175,7 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
 .bd-block{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:5px;border:1px solid;font-size:11px;font-weight:600;}
 
 
-.v112-only{}.v111-only{}
+.v112-only{}.v111-only{}.v123-only{}
 .hdr-select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:11px;padding:4px 8px;outline:none;cursor:pointer;transition:border-color .15s;height:28px;}
 .hdr-select:hover,.hdr-select:focus{border-color:var(--accent);}
 .hdr-select.ver-select{color:var(--green);}
@@ -195,9 +195,10 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
 <header>
   <div class="logo">🚀</div>
   <h1>Cargo Rocket Script Generator</h1>
-  <span class="version-badge">Forge 1.20.1 · v1.2.2</span>
+  <span class="version-badge">Forge 1.20.1 · v1.2.3</span>
   <div class="header-right">
     <select class="hdr-select ver-select" id="verSelect" onchange="setVer(this.value)">
+      <option value="v123">v1.2.3</option>
       <option value="v122">v1.2.2</option>
       <option value="v121">v1.2.1</option>
     </select>
@@ -319,7 +320,6 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
           <label data-i18n="lbl_cargocheck">Cargo Fluid Check <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_cargocheck">Check cargo fluid after return. Supply/drain via TOP or SIDE face pipes.</div></span></label>
           <select id="cargoCheck">
             <option value="log" data-i18n="cargo_log">Log type and amount</option>
-            <option value="wait_fill" data-i18n="cargo_wait_fill">Wait until full</option>
             <option value="wait_empty" data-i18n="cargo_wait_empty">Wait until empty</option>
             <option value="none" data-i18n="cargo_none">Disabled</option>
           </select>
@@ -344,6 +344,24 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
             <label data-i18n="lbl_unloadfilter">Unload Filter <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_unloadfilter">Item ID filter for unloading. Blank = all items.</div></span></label>
             <input type="text" id="unloadFilter" data-i18n-placeholder="ph_unloadfilter">
           </div>
+          <div class="field v112-only">
+            <label data-i18n="lbl_loadwait">Wait Before Launch <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_loadwait">Hold the rocket on the pad and keep loading until a condition is met, instead of launching immediately after one load pass.</div></span></label>
+            <select id="loadWaitMode" onchange="toggleLoadWaitFields()">
+              <option value="none" data-i18n="loadwait_none">Launch immediately after one load</option>
+              <option value="full" data-i18n="loadwait_full">Wait until rocket inventory is full</option>
+              <option value="qty" data-i18n="loadwait_qty">Wait until item reaches a quantity</option>
+            </select>
+          </div>
+          <div class="row2 v112-only" id="loadWaitQtyFields" style="display:none">
+            <div class="field">
+              <label data-i18n="lbl_loadwaititem">Item ID <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_loadwaititem">Item to count. Blank = total item count across all slots.</div></span></label>
+              <input type="text" id="loadWaitItem" data-i18n-placeholder="ph_loadwaititem">
+            </div>
+            <div class="field">
+              <label data-i18n="lbl_loadwaitqty">Target Qty <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_loadwaitqty">Launch once this many items are aboard the rocket.</div></span></label>
+              <input type="number" id="loadWaitQty" value="64" min="1">
+            </div>
+          </div>
         </div>
         <div class="mode-panel" id="mode-manual">
           <div style="margin-bottom:.65rem">
@@ -356,6 +374,38 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
             <div class="slot-list" id="unloadSlots"></div>
             <button class="add-btn" onclick="addUnload()" data-i18n="btn_addslot">+ Add Slot</button>
           </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-label" data-i18n="sec_fluidload">Cargo Fluid Load <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_fluidload">Hold the rocket on the pad until the cargo fluid tank reaches a target amount before launching.</div></span></div>
+        <div class="field v112-only">
+          <label data-i18n="lbl_fluidloadmode">Fluid Load Wait <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_fluidloadmode">Requires a fluid pipe feeding the TOP/SIDE face of the launchpad while waiting.</div></span></label>
+          <select id="fluidLoadMode" onchange="toggleFluidLoadFields()">
+            <option value="none" data-i18n="fluidload_none">Don't wait, launch as-is</option>
+            <option value="full" data-i18n="fluidload_full">Wait until cargo tank is full</option>
+            <option value="qty" data-i18n="fluidload_qty">Wait until a specific amount (mB)</option>
+          </select>
+        </div>
+        <div class="field v112-only" id="fluidLoadQtyField" style="display:none">
+          <label data-i18n="lbl_fluidloadqty">Target Amount (mB) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_fluidloadqty">Launch once the cargo tank holds at least this much fluid.</div></span></label>
+          <input type="number" id="fluidLoadQty" value="8000" min="1">
+        </div>
+      </div>
+      <div class="section v123-only">
+        <div class="section-label" data-i18n="sec_scanner">Rocket Scanner Integration <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_scanner">v1.2.3+ only. Reports rocket name and live status to the Rocket Scanner item's GUI via setRocketName/setRocketStatus.</div></span></div>
+        <div class="field">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="scannerSetName" onchange="toggleScannerNameField()" style="width:auto;"> <span data-i18n="lbl_scannername">Set rocket name on launch</span>
+          </label>
+        </div>
+        <div class="field" id="scannerNameField" style="display:none">
+          <label data-i18n="lbl_scannernamevalue">Rocket Name <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_scannernamevalue">Shown in the Scanner GUI's rocket list. Max 32 characters.</div></span></label>
+          <input type="text" id="scannerNameValue" maxlength="32" data-i18n-placeholder="ph_scannername">
+        </div>
+        <div class="field">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="scannerSetStatus" checked style="width:auto;"> <span data-i18n="lbl_scannerstatus">Report wait status to Scanner GUI</span>
+          </label>
         </div>
       </div>
       <button class="gen-btn" onclick="generate()" data-i18n="btn_generate">⚡ Generate Script</button>
@@ -510,6 +560,17 @@ en:{
   lbl_loadfilter:"Load Filter",tip_loadfilter:"Item ID filter. Blank = all items.",ph_loadfilter:"e.g. minecraft:cobblestone",
   lbl_unloadfilter:"Unload Filter",tip_unloadfilter:"Item ID filter for unloading. Blank = all.",ph_unloadfilter:"e.g. minecraft:iron_ore",
   manual_load:"LOAD (pad → rocket)",manual_unload:"UNLOAD (rocket → pad)",
+  lbl_loadwait:"Wait Before Launch",tip_loadwait:"Hold the rocket on the pad and keep loading until a condition is met, instead of launching immediately after one load pass.",
+  loadwait_none:"Launch immediately after one load",loadwait_full:"Wait until rocket inventory is full",loadwait_qty:"Wait until item reaches a quantity",
+  lbl_loadwaititem:"Item ID",tip_loadwaititem:"Item to count. Blank = total item count across all slots.",ph_loadwaititem:"e.g. minecraft:iron_ingot (blank = any item)",
+  lbl_loadwaitqty:"Target Qty",tip_loadwaitqty:"Launch once this many items are aboard the rocket.",
+  sec_fluidload:"Cargo Fluid Load",tip_fluidload:"Hold the rocket on the pad until the cargo fluid tank reaches a target amount before launching.",
+  lbl_fluidloadmode:"Fluid Load Wait",tip_fluidloadmode:"Requires a fluid pipe feeding the TOP/SIDE face of the launchpad while waiting.",
+  fluidload_none:"Don't wait, launch as-is",fluidload_full:"Wait until cargo tank is full",fluidload_qty:"Wait until a specific amount (mB)",
+  lbl_fluidloadqty:"Target Amount (mB)",tip_fluidloadqty:"Launch once the cargo tank holds at least this much fluid.",
+  sec_scanner:"Rocket Scanner Integration",tip_scanner:"v1.2.3+ only. Reports rocket name and live status to the Rocket Scanner item's GUI via setRocketName/setRocketStatus.",
+  lbl_scannername:"Set rocket name on launch",lbl_scannernamevalue:"Rocket Name",tip_scannernamevalue:"Shown in the Scanner GUI's rocket list. Max 32 characters.",ph_scannername:"e.g. Earth-Mars Shuttle",
+  lbl_scannerstatus:"Report wait status to Scanner GUI",
   btn_addslot:"+ Add Slot",btn_generate:"⚡ Generate Script",btn_copy:"📋 Copy",btn_dl:"💾 Download",btn_copied:"✅ Copied!",
   stat_lines:"Lines",stat_mode:"Mode",stat_fuel:"Fuel",placeholder_text:"Configure settings and generate your script",
   slot_pad:"pad",slot_rocket:"rocket",
@@ -553,6 +614,17 @@ ja:{
   lbl_loadfilter:"ロードフィルター",tip_loadfilter:"アイテムIDでフィルター。空白 = 全アイテム。",ph_loadfilter:"例: minecraft:cobblestone",
   lbl_unloadfilter:"アンロードフィルター",tip_unloadfilter:"アンロード用フィルター。空白 = 全て。",ph_unloadfilter:"例: minecraft:iron_ore",
   manual_load:"積み込み（発射台 → ロケット）",manual_unload:"降ろし（ロケット → 発射台）",
+  lbl_loadwait:"発射前の積み込み待機",tip_loadwait:"1回積み込んだらすぐ発射するのではなく、条件を満たすまでロケットを発射台に留めて積み込みを続けます。",
+  loadwait_none:"1回積み込んだらすぐ発射",loadwait_full:"ロケットのインベントリが満タンになるまで待機",loadwait_qty:"指定アイテムが指定数量に達するまで待機",
+  lbl_loadwaititem:"アイテムID",tip_loadwaititem:"数える対象アイテム。空白 = 全スロットの合計個数。",ph_loadwaititem:"例: minecraft:iron_ingot（空白で任意のアイテム）",
+  lbl_loadwaitqty:"目標数量",tip_loadwaitqty:"ロケットにこの個数が積まれたら発射します。",
+  sec_fluidload:"カーゴ流体の積み込み",tip_fluidload:"カーゴ流体タンクが目標量に達するまでロケットを発射台に留めます。",
+  lbl_fluidloadmode:"流体積み込み待機",tip_fluidloadmode:"待機中は発射台の上面・側面に流体パイプで供給してください。",
+  fluidload_none:"待機せずそのまま発射",fluidload_full:"カーゴタンクが満タンになるまで待機",fluidload_qty:"指定量（mB）に達するまで待機",
+  lbl_fluidloadqty:"目標量（mB）",tip_fluidloadqty:"カーゴタンクがこの量に達したら発射します。",
+  sec_scanner:"Rocket Scanner連携",tip_scanner:"v1.2.3以降限定。setRocketName/setRocketStatusでロケットの名前と現在の状態をRocket ScannerアイテムのGUIに送信します。",
+  lbl_scannername:"発射時にロケット名を設定",lbl_scannernamevalue:"ロケット名",tip_scannernamevalue:"Scanner GUIのロケット一覧に表示されます。最大32文字。",ph_scannername:"例: 地球-火星シャトル",
+  lbl_scannerstatus:"待機状態をScanner GUIへ報告",
   btn_addslot:"+ スロット追加",btn_generate:"⚡ スクリプト生成",btn_copy:"📋 コピー",btn_dl:"💾 DL",btn_copied:"✅ コピー完了！",
   stat_lines:"行数",stat_mode:"モード",stat_fuel:"燃料",placeholder_text:"設定を入力してスクリプトを生成してください",
   slot_pad:"発射台",slot_rocket:"ロケット",
@@ -572,15 +644,20 @@ ja:{
 // ============================================================
 // LANG & TABS
 // ============================================================
-let lang='en',currentMode='simple',currentHelp='setup',modVer='v122';
+let lang='en',currentMode='simple',currentHelp='setup',modVer='v123';
 function setVer(v){modVer=v;applyVer();}
 function applyVer(){
   const is111=modVer==='v121';
+  const is123=modVer==='v123';
   document.querySelectorAll('.v112-only').forEach(el=>el.style.display=is111?'none':'');
+  document.querySelectorAll('.v123-only').forEach(el=>el.style.display=is123?'':'none');
   // v1.2.1ではSimpleモードが使えないのでManualに強制切替
   if(is111&&currentMode==='simple'){const mb=document.getElementById('btn-simple');if(mb){const manualBtn=document.querySelector('[onclick*="setMode\'manual"]');if(manualBtn)setMode('manual',manualBtn);}}
   // version-badge更新
-  document.querySelector('.version-badge').textContent='Forge 1.20.1 · '+(is111?'v1.2.1':'v1.2.2');document.getElementById('verSelect').value=modVer;
+  const verLabel=is111?'v1.2.1':(is123?'v1.2.3':'v1.2.2');
+  document.querySelector('.version-badge').textContent='Forge 1.20.1 · '+verLabel;document.getElementById('verSelect').value=modVer;
+  // v112-only の一括表示切替で個別の条件付き表示（qty系フィールド）が巻き戻るため再適用
+  if(!is111){toggleLoadWaitFields();toggleFluidLoadFields();}
   renderHelp(currentHelp);
 }
 function setLang(l){lang=l;applyTranslations();renderHelp(currentHelp);}
@@ -608,6 +685,9 @@ function calcTier(){const req=Math.max(TIER[document.getElementById('origin').va
 // GENERATOR MODES & SLOTS
 // ============================================================
 function setMode(mode,btn){currentMode=mode;document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.mode-panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('mode-'+mode).classList.add('active');}
+function toggleLoadWaitFields(){const v=document.getElementById('loadWaitMode').value;document.getElementById('loadWaitQtyFields').style.display=v==='qty'?'grid':'none';}
+function toggleFluidLoadFields(){const v=document.getElementById('fluidLoadMode').value;document.getElementById('fluidLoadQtyField').style.display=v==='qty'?'block':'none';}
+function toggleScannerNameField(){document.getElementById('scannerNameField').style.display=document.getElementById('scannerSetName').checked?'block':'none';}
 addLoad(10,1);addUnload(1,10);
 function addLoad(ps=10,rs=1){const el=document.createElement('div');el.className='slot-item';const pl=T[lang].slot_pad,rl=T[lang].slot_rocket;el.innerHTML=`<span>${pl}</span><input type="number" class="ps" value="${ps}" min="1" max="27"><div class="arrow">→</div><span>${rl}</span><input type="number" class="rs" value="${rs}" min="1" max="27"><button class="del-btn" onclick="this.parentElement.remove()">×</button>`;document.getElementById('loadSlots').appendChild(el);}
 function addUnload(rs=1,ps=10){const el=document.createElement('div');el.className='slot-item';const pl=T[lang].slot_pad,rl=T[lang].slot_rocket;el.innerHTML=`<span>${rl}</span><input type="number" class="rs" value="${rs}" min="1" max="27"><div class="arrow">→</div><span>${pl}</span><input type="number" class="ps" value="${ps}" min="1" max="27"><button class="del-btn" onclick="this.parentElement.remove()">×</button>`;document.getElementById('unloadSlots').appendChild(el);}
@@ -621,26 +701,59 @@ function hl(code){return code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 // GENERATE
 // ============================================================
 function buildCode(cfg){
-  const{pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination}=cfg;
+  const{pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination,loadWaitMode,loadWaitItem,loadWaitQty,fluidLoadMode,fluidLoadQty,scannerSetName,scannerNameValue,scannerSetStatus}=cfg;
   const loadItems=cfg.loadItems!==false;
   const loadCargo=cfg.loadCargo!==false;
+
+  // Rocket Scanner integration (v1.2.3+): report live wait-status text to the
+  // Scanner GUI. Wrapped in pcall so this is silently skipped on older mod
+  // versions where setRocketStatus/setRocketName don't exist.
+  const setStatus = (msg, indent='    ') => scannerSetStatus
+    ? `\n${indent}pcall(function() launch_pad.setRocketStatus(${msg}) end)`
+    : '';
+  const nameLine = (scannerSetName && scannerNameValue)
+    ? `    pcall(function() launch_pad.setRocketName("${scannerNameValue}") end)\n`
+    : '';
+
   let fuelBlock='';
-  if(fuelCheck==='wait'){fuelBlock=`\n  -- Wait for fuel\n  while true do\n    local fuel = launch_pad.getFuel()\n    print("[FUEL] " .. fuel .. " / ${minFuel} mB")\n    if fuel >= ${minFuel} then print("[OK] Fuel ready") break end\n    sleep(ENERGY_INTERVAL)\n  end\n`;}
+  if(fuelCheck==='wait'){fuelBlock=`\n  -- Wait for fuel\n  while true do\n    local fuel = launch_pad.getFuel()\n    print("[FUEL] " .. fuel .. " / ${minFuel} mB")\n    if fuel >= ${minFuel} then print("[OK] Fuel ready") break end${setStatus('"Waiting for fuel: " .. fuel .. "/' + minFuel + ' mB"', '    ')}\n    sleep(ENERGY_INTERVAL)\n  end\n`;}
   else if(fuelCheck==='warn'){fuelBlock=`\n  local fuel = launch_pad.getFuel()\n  if fuel < ${minFuel} then print("[WARN] Low fuel: " .. fuel .. " mB") else print("[OK] Fuel: " .. fuel .. " mB") end\n`;}
-  // Pre-launch cargo fluid wait (only relevant when this end is expected to load cargo)
+
+  // Item load-wait: keep loading from the pad until rocket inventory is full,
+  // or until a specific item reaches a target quantity aboard the rocket.
+  let loadWaitBlock='';
+  if(loadItems&&loadWaitMode==='full'){
+    loadWaitBlock=`\n    -- Keep loading until rocket inventory is full\n    while true do\n      local inv = launch_pad.listRocketInventory()\n      local full = true\n      if inv then\n        for s = 1, 9 do\n          if not inv[s] then full = false break end\n        end\n      else\n        full = false\n      end\n      if full then print("[LOAD] Rocket inventory full") break end\n      print("[LOAD] Waiting for more items...")${setStatus('"Loading items (waiting for full inventory)"', '      ')}\n${loadLine}\n      sleep(ENERGY_INTERVAL)\n    end`;
+  } else if(loadItems&&loadWaitMode==='qty'){
+    const itemCheck=loadWaitItem
+      ? `local lwid = "${loadWaitItem}"\n      for slot, it in pairs(inv or {}) do\n        if it.id == lwid then count = count + it.count end\n      end`
+      : `for slot, it in pairs(inv or {}) do count = count + it.count end`;
+    loadWaitBlock=`\n    -- Keep loading until target quantity is reached\n    while true do\n      local inv = launch_pad.listRocketInventory()\n      local count = 0\n      ${itemCheck}\n      print("[LOAD] " .. count .. " / ${loadWaitQty}")\n      if count >= ${loadWaitQty} then print("[OK] Load target reached") break end${setStatus('"Loading items: " .. count .. "/' + loadWaitQty + '"', '      ')}\n${loadLine}\n      sleep(ENERGY_INTERVAL)\n    end`;
+  }
+
+  // Cargo fluid load-wait: hold the rocket on the pad until the cargo tank
+  // reaches a target amount (or is full) before launching.
   let preCargoBlock='';
-  if(loadCargo&&cargoCheck==='wait_fill'){preCargoBlock=`\n    -- Wait for cargo fluid to be loaded\n    while true do\n      local cf=launch_pad.getCargoFluid()\n      local target=${cargoThreshold}>0 and ${cargoThreshold} or launch_pad.getMaxCargoFluid()\n      print("[CARGO] " .. cf .. "/" .. target .. " mB")\n      if cf>=target then print("[OK] Cargo ready") break end\n      sleep(ENERGY_INTERVAL)\n    end`;}
+  if(loadCargo&&fluidLoadMode==='full'){
+    preCargoBlock=`\n    -- Wait for cargo fluid tank to fill\n    while true do\n      local cf=launch_pad.getCargoFluid()\n      local target=launch_pad.getMaxCargoFluid()\n      print("[CARGO] " .. cf .. "/" .. target .. " mB")\n      if cf>=target then print("[OK] Cargo tank full") break end${setStatus('"Waiting for cargo fluid: " .. cf .. "/" .. target .. " mB"', '      ')}\n      sleep(ENERGY_INTERVAL)\n    end`;
+  } else if(loadCargo&&fluidLoadMode==='qty'){
+    preCargoBlock=`\n    -- Wait for cargo fluid to reach target amount\n    while true do\n      local cf=launch_pad.getCargoFluid()\n      print("[CARGO] " .. cf .. " / ${fluidLoadQty} mB")\n      if cf>=${fluidLoadQty} then print("[OK] Cargo target reached") break end${setStatus('"Waiting for cargo fluid: " .. cf .. "/' + fluidLoadQty + ' mB"', '      ')}\n      sleep(ENERGY_INTERVAL)\n    end`;
+  }
+
   // Post-return cargo fluid handling (log or wait until drained)
   let cargoBlock='';
   if(cargoCheck==='log'){cargoBlock=`\n      print("[CARGO] " .. launch_pad.getCargoFluidType() .. " : " .. launch_pad.getCargoFluid() .. " mB")`;}
-  else if(cargoCheck==='wait_empty'){cargoBlock=`\n      while true do\n        local cf=launch_pad.getCargoFluid()\n        print("[CARGO] draining: " .. cf .. " mB")\n        if cf<=${cargoThreshold} then print("[OK] Cargo drained") break end\n        sleep(ENERGY_INTERVAL)\n      end`;}
+  else if(cargoCheck==='wait_empty'){cargoBlock=`\n      while true do\n        local cf=launch_pad.getCargoFluid()\n        print("[CARGO] draining: " .. cf .. " mB")\n        if cf<=${cargoThreshold} then print("[OK] Cargo drained") break end${setStatus('"Draining cargo fluid: " .. cf .. " mB"', '        ')}\n        sleep(ENERGY_INTERVAL)\n      end`;}
   const roleLabel=isDestination?'Destination':'Origin';
   // Safety: wait for the rocket to actually be present before unloading,
   // instead of assuming RETURN_WAIT was long enough (fixes "No rocket found").
   const waitForReturnBlock=`      print("[FLIGHT] Waiting " .. RETURN_WAIT .. " sec (minimum)...")\n      sleep(RETURN_WAIT)\n      print("[FLIGHT] Confirming rocket has returned...")\n      while not launch_pad.isRocketPresent() do\n        print("[FLIGHT] Still waiting for rocket to return...")\n        sleep(ENERGY_INTERVAL)\n      end`;
   const loadStep=loadItems
-    ? `    print("[LOAD] Moving items to rocket...")\n${loadLine}`
-    : `    print("[LOAD] Skipping item load at this end (disabled)")`;
+    ? `    print("[LOAD] Moving items to rocket...")\n${nameLine}${loadLine}${loadWaitBlock}`
+    : `    print("[LOAD] Skipping item load at this end (disabled)")\n${nameLine}`;
+  const clearStatusLine = scannerSetStatus
+    ? `\n    pcall(function() launch_pad.setRocketStatus("") end)`
+    : '';
   return `-- ============================================
 -- Cargo Rocket Automation Script (${roleLabel})
 -- Ad Astra + CC:Tweaked
@@ -665,7 +778,7 @@ while true do
     local energy = launch_pad.getEnergy()
     local required = launch_pad.getEnergyRequiredForLaunch()
     print("[ENERGY] " .. energy .. " / " .. required)
-    if energy >= required then print("[OK] Energy charged") break end
+    if energy >= required then print("[OK] Energy charged") break end${setStatus('"Waiting for energy: " .. energy .. "/" .. required', '    ')}
     sleep(ENERGY_INTERVAL)
   end
 ${fuelBlock}
@@ -673,7 +786,7 @@ ${fuelBlock}
     print("[WARN] No rocket. Waiting...")
     sleep(ENERGY_INTERVAL)
   else
-${loadStep}${preCargoBlock}
+${loadStep}${preCargoBlock}${clearStatusLine}
     print("[LAUNCH] Launching to " .. PLANET)
     local ok, err = pcall(function() launch_pad.launch(PLANET) end)
     if not ok then
@@ -696,21 +809,33 @@ function generate(){
   const origin=document.getElementById('origin').value||'minecraft:overworld';
   const interval=parseInt(document.getElementById('energyInterval').value)||5;
   const returnWait=parseInt(document.getElementById('returnWait').value)||30;
-  const fuelCheck=modVer==='v122'?document.getElementById('fuelCheck').value:'none';
+  const fuelCheck=modVer!=='v121'?document.getElementById('fuelCheck').value:'none';
   const minFuel=parseInt(document.getElementById('minFuel').value)||3000;
-  const cargoCheck=modVer==='v122'?document.getElementById('cargoCheck').value:'none';
+  const cargoCheck=modVer!=='v121'?document.getElementById('cargoCheck').value:'none';
   const cargoThreshold=parseInt(document.getElementById('cargoThreshold').value)||0;
   const isRoundTrip=document.getElementById('roundTrip').value==='roundtrip';
   // Per-direction load toggles (only meaningful for round-trip; one-way always loads)
   const originLoadItems=isRoundTrip?document.getElementById('originLoadItems').checked:true;
-  const originLoadCargo=isRoundTrip&&modVer==='v122'?document.getElementById('originLoadCargo').checked:true;
+  const originLoadCargo=isRoundTrip&&modVer!=='v121'?document.getElementById('originLoadCargo').checked:true;
   const destLoadItems=isRoundTrip?document.getElementById('destLoadItems').checked:true;
-  const destLoadCargo=isRoundTrip&&modVer==='v122'?document.getElementById('destLoadCargo').checked:true;
+  const destLoadCargo=isRoundTrip&&modVer!=='v121'?document.getElementById('destLoadCargo').checked:true;
+  // Item load-wait (Simple mode only — slot-based Manual mode doesn't have a "full" concept)
+  const loadWaitMode=(currentMode==='simple'&&modVer!=='v121')?document.getElementById('loadWaitMode').value:'none';
+  const loadWaitItem=document.getElementById('loadWaitItem').value.trim();
+  const loadWaitQty=parseInt(document.getElementById('loadWaitQty').value)||64;
+  // Cargo fluid load-wait
+  const fluidLoadMode=modVer!=='v121'?document.getElementById('fluidLoadMode').value:'none';
+  const fluidLoadQty=parseInt(document.getElementById('fluidLoadQty').value)||8000;
+  // Rocket Scanner integration (v1.2.3+ only)
+  const scannerSetName=modVer==='v123'&&document.getElementById('scannerSetName').checked;
+  const scannerNameValue=document.getElementById('scannerNameValue').value.trim().slice(0,32);
+  const scannerSetStatus=modVer==='v123'&&document.getElementById('scannerSetStatus').checked;
   let loadLine,unloadLine;
-  if(currentMode==='simple'&&modVer==='v122'){const lf=document.getElementById('loadFilter').value.trim();const uf=document.getElementById('unloadFilter').value.trim();loadLine=lf?`  launch_pad.loadAllItems("${lf}")`:`  launch_pad.loadAllItems()`;unloadLine=uf?`  launch_pad.unloadAllItems("${uf}")`:`  launch_pad.unloadAllItems()`;}
+  if(currentMode==='simple'&&modVer!=='v121'){const lf=document.getElementById('loadFilter').value.trim();const uf=document.getElementById('unloadFilter').value.trim();loadLine=lf?`  launch_pad.loadAllItems("${lf}")`:`  launch_pad.loadAllItems()`;unloadLine=uf?`  launch_pad.unloadAllItems("${uf}")`:`  launch_pad.unloadAllItems()`;}
   else{const loads=[...document.querySelectorAll('#loadSlots .slot-item')].map(r=>({ps:r.querySelector('.ps').value,rs:r.querySelector('.rs').value}));const unloads=[...document.querySelectorAll('#unloadSlots .slot-item')].map(r=>({rs:r.querySelector('.rs').value,ps:r.querySelector('.ps').value}));loadLine=loads.length?loads.map(s=>`  launch_pad.moveItemsFromLaunchPadToRocket(${s.ps},${s.rs})`).join('\n'):'  -- no load slots';unloadLine=unloads.length?unloads.map(s=>`  launch_pad.moveItemsFromRocketToLaunchPad(${s.rs},${s.ps})`).join('\n'):'  -- no unload slots';}
 
-  const code=buildCode({pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination:false,loadItems:originLoadItems,loadCargo:originLoadCargo});
+  const baseCfg={pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,loadWaitMode,loadWaitItem,loadWaitQty,fluidLoadMode,fluidLoadQty,scannerSetName,scannerNameValue,scannerSetStatus};
+  const code=buildCode({...baseCfg,isDestination:false,loadItems:originLoadItems,loadCargo:originLoadCargo});
   window._code=code;
   document.getElementById('placeholder').style.display='none';
   const block=document.getElementById('codeBlock');block.style.display='block';block.innerHTML=hl(code);
@@ -724,7 +849,7 @@ function generate(){
     document.getElementById('outputTitle1').textContent=`// startup.lua (${origin})`;
     document.getElementById('outputTitle2').textContent=`// startup.lua (${planet})`;
     // Destination script launches back to the origin
-    const code2=buildCode({pad,planet:origin,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination:true,loadItems:destLoadItems,loadCargo:destLoadCargo});
+    const code2=buildCode({...baseCfg,planet:origin,isDestination:true,loadItems:destLoadItems,loadCargo:destLoadCargo});
     window._code2=code2;
     const block2=document.getElementById('codeBlock2');block2.innerHTML=hl(code2);
     destBlockEl.style.display='block';
@@ -1144,6 +1269,12 @@ ${apiTable([
   {fn:'listLaunchPadInventory()',ret:'table',d:isJa?'発射台インベントリのアイテム一覧。':'List launchpad inventory.'},
   {fn:'listLaunchPadInputSlotIndexes()',ret:'int[]',d:isJa?'ホッパー等が挿入できるスロット番号一覧。':'Slot indexes hoppers can insert into.'},
   {fn:'listLaunchPadOutputSlotIndexes()',ret:'int[]',d:isJa?'ホッパー等が取り出せるスロット番号一覧。':'Slot indexes hoppers can extract from.'},
+],th)}
+<h2>${isJa?`Rocket Scanner連携（v1.2.3+）`:`Rocket Scanner (v1.2.3+)`}</h2>
+${modVer!=='v123'?`<div class="warn-box">${isJa?'Rocket Scanner APIは v1.2.3 以降でのみ使用できます。':'Rocket Scanner API is only available in v1.2.3+.'}</div>`:''}
+${apiTable([
+  {fn:'setRocketStatus(status)',ret:'—',d:isJa?'発射台にあるロケットに表示用の状態文字列を設定。Rocket ScannerアイテムのGUIで自動推測より優先して表示される。ロケットがなければエラー。':'Sets a display status string on the rocket on this pad. Shown in the Rocket Scanner GUI in place of the automatic guess. Throws if no rocket is present.'},
+  {fn:'setRocketName(name)',ret:'—',d:isJa?'発射台にあるロケットに名前を設定（最大32文字）。Rocket Scanner GUIのロケット一覧に表示される。ロケットがなければエラー。':'Sets a display name on the rocket on this pad (max 32 chars). Shown in the Rocket Scanner GUI rocket list. Throws if no rocket is present.'},
 ],th)}`;
 }
 
