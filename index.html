@@ -120,7 +120,7 @@ header h1{font-size:15px;font-weight:800;letter-spacing:-.02em;}
 .cb-move{display:flex;flex-direction:column;gap:1px;margin-right:2px;}
 .cb-move button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:10px;line-height:1;padding:1px 3px;border-radius:2px;}
 .cb-move button:hover{color:var(--text);background:var(--surface2);}
-.canvas-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;color:var(--muted);font-size:12px;gap:.5rem;font-family:var(--mono);}
+.canvas-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;color:var(--muted);font-size:12px;gap:.5rem;font-family:var(--mono);pointer-events:none;}
 .canvas-empty .icon{font-size:32px;opacity:.3;}
 .vb-gen-btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-size:14px;font-weight:700;padding:11px;cursor:pointer;transition:opacity .15s,transform .1s;}
 .vb-gen-btn:hover{opacity:.9;}.vb-gen-btn:active{transform:scale(.98);}
@@ -768,7 +768,7 @@ const PARAM_LABELS={pad:'p_pad',interval:'p_interval',minfuel:'p_minfuel',filter
 // パレット全体に委譲（動的に変わってもOK）
 document.getElementById('tab-visual').addEventListener('dragstart',e=>{
   const pb=e.target.closest('.palette-block');
-  if(pb){dragSrcType=pb.dataset.type;dragSrcIdx=null;e.dataTransfer.effectAllowed='copy';e.dataTransfer.setData('text/plain',pb.dataset.type);}
+  if(pb){dragSrcType=pb.dataset.type;dragSrcIdx=null;e.dataTransfer.effectAllowed='copyMove';e.dataTransfer.setData('text/plain',pb.dataset.type);}
 });
 
 // canvasAreaへのドロップ（一度だけ登録、以降は常に有効）
