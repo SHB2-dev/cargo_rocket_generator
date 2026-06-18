@@ -175,7 +175,7 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
 .bd-block{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:5px;border:1px solid;font-size:11px;font-weight:600;}
 
 
-.v112-only{}.v111-only{}.v123-only{}
+.v112-only{}.v111-only{}.v123-only{}.v124-only{}.legacy-only{}
 .hdr-select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:11px;padding:4px 8px;outline:none;cursor:pointer;transition:border-color .15s;height:28px;}
 .hdr-select:hover,.hdr-select:focus{border-color:var(--accent);}
 .hdr-select.ver-select{color:var(--green);}
@@ -195,9 +195,10 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
 <header>
   <div class="logo">🚀</div>
   <h1>Cargo Rocket Script Generator</h1>
-  <span class="version-badge">Forge 1.20.1 · v1.2.3</span>
+  <span class="version-badge">Forge 1.20.1 · v1.2.4</span>
   <div class="header-right">
     <select class="hdr-select ver-select" id="verSelect" onchange="setVer(this.value)">
+      <option value="v124">v1.2.4</option>
       <option value="v123">v1.2.3</option>
       <option value="v122">v1.2.2</option>
       <option value="v121">v1.2.1</option>
@@ -226,30 +227,6 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
             <option value="oneway" data-i18n="rt_oneway">One-way (single script)</option>
             <option value="roundtrip" data-i18n="rt_roundtrip">Round-trip (origin + destination)</option>
           </select>
-        </div>
-        <div class="field" id="roundTripDirField" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 11px;">
-          <label style="margin-bottom:8px;" data-i18n="lbl_rtdir">Per-Direction Cargo <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_rtdir">Choose whether items and cargo fluid are loaded at each end. Useful when cargo should only flow one way.</div></span></label>
-          <div class="row2" style="margin-bottom:6px;">
-            <div>
-              <div style="font-size:10px;color:var(--accent2);font-family:var(--mono);margin-bottom:4px;" data-i18n="rtdir_origin_hdr">Origin →</div>
-              <label style="display:flex;align-items:center;gap:5px;font-size:11px;margin-bottom:5px;cursor:pointer;">
-                <input type="checkbox" id="originLoadItems" checked style="width:auto;"> <span data-i18n="rtdir_loaditems">Load items</span>
-              </label>
-              <label class="v112-only" style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
-                <input type="checkbox" id="originLoadCargo" checked style="width:auto;"> <span data-i18n="rtdir_loadcargo">Load cargo fluid</span>
-              </label>
-            </div>
-            <div>
-              <div style="font-size:10px;color:var(--accent2);font-family:var(--mono);margin-bottom:4px;" data-i18n="rtdir_dest_hdr">Destination →</div>
-              <label style="display:flex;align-items:center;gap:5px;font-size:11px;margin-bottom:5px;cursor:pointer;">
-                <input type="checkbox" id="destLoadItems" checked style="width:auto;"> <span data-i18n="rtdir_loaditems">Load items</span>
-              </label>
-              <label class="v112-only" style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
-                <input type="checkbox" id="destLoadCargo" checked style="width:auto;"> <span data-i18n="rtdir_loadcargo">Load cargo fluid</span>
-              </label>
-            </div>
-          </div>
-          <div style="font-size:10px;color:var(--muted);line-height:1.5;" data-i18n="rtdir_note">Unchecking "Load" still unloads/drains at that end — it only skips loading new cargo before launch.</div>
         </div>
         <div class="field">
           <label data-i18n="lbl_pad">Peripheral Name <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_pad">Direction or device name seen from the PC. Check with peripheral.getNames(). e.g. top, bottom, left</div></span></label>
@@ -300,8 +277,8 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
             <input type="number" id="energyInterval" value="5" min="1" max="60">
           </div>
           <div class="field">
-            <label data-i18n="lbl_return">Return Wait (sec) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_return">How long to wait for rocket to return after launch.</div></span></label>
-            <input type="number" id="returnWait" value="30" min="5" max="600">
+            <label data-i18n="lbl_return">Grounded Wait (sec) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_return">How long to wait after the rocket actually comes to a stop (not a fixed timer from launch) before it's eligible to be reloaded and relaunched. Gives you time to walk over and use the rocket's inventory screen.</div></span></label>
+            <input type="number" id="returnWait" value="30" min="0" max="600">
           </div>
         </div>
         <div class="field v112-only">
@@ -317,7 +294,7 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
           <input type="number" id="minFuel" value="3000" min="0">
         </div>
         <div class="field v112-only">
-          <label data-i18n="lbl_cargocheck">Cargo Fluid Check <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_cargocheck">Check cargo fluid after return. Supply/drain via TOP or SIDE face pipes.</div></span></label>
+          <label data-i18n="lbl_cargocheck">Cargo Fluid Check <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_cargocheck">Checks the cargo fluid currently aboard the rocket itself (filled/drained by hand via the rocket's inventory screen).</div></span></label>
           <select id="cargoCheck">
             <option value="log" data-i18n="cargo_log">Log type and amount</option>
             <option value="wait_empty" data-i18n="cargo_wait_empty">Wait until empty</option>
@@ -329,7 +306,40 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
           <input type="number" id="cargoThreshold" value="0" min="0">
         </div>
       </div>
-      <div class="section">
+      <div class="section v124-only">
+        <div class="section-label" data-i18n="sec_loadwait">Pre-Launch Check <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_loadwait_v124">Items and cargo fluid are now loaded/unloaded by hand from the rocket's own inventory screen (right-click the rocket while it's grounded). This script no longer transfers anything automatically — it only waits for energy/fuel and triggers the launch.</div></span></div>
+        <div class="field">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+            <input type="checkbox" id="requireEmptyBeforeLaunch" style="width:auto;"> <span data-i18n="lbl_requireempty">Don't launch until the rocket's inventory is empty</span>
+          </label>
+          <div style="font-size:10px;color:var(--muted);line-height:1.5;margin-top:4px;" data-i18n="tip_requireempty">Safety check: if leftover cargo wasn't unloaded by hand last cycle, hold the rocket on the pad instead of launching it again with old items still aboard.</div>
+        </div>
+      </div>
+      <div class="section legacy-only" id="legacyRoundTripDirField" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 11px;">
+        <label style="margin-bottom:8px;" data-i18n="lbl_rtdir">Per-Direction Cargo <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_rtdir">Choose whether items and cargo fluid are loaded at each end. Useful when cargo should only flow one way.</div></span></label>
+        <div class="row2" style="margin-bottom:6px;">
+          <div>
+            <div style="font-size:10px;color:var(--accent2);font-family:var(--mono);margin-bottom:4px;" data-i18n="rtdir_origin_hdr">Origin →</div>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;margin-bottom:5px;cursor:pointer;">
+              <input type="checkbox" id="originLoadItems" checked style="width:auto;"> <span data-i18n="rtdir_loaditems">Load items</span>
+            </label>
+            <label class="v112-only" style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+              <input type="checkbox" id="originLoadCargo" checked style="width:auto;"> <span data-i18n="rtdir_loadcargo">Load cargo fluid</span>
+            </label>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--accent2);font-family:var(--mono);margin-bottom:4px;" data-i18n="rtdir_dest_hdr">Destination →</div>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;margin-bottom:5px;cursor:pointer;">
+              <input type="checkbox" id="destLoadItems" checked style="width:auto;"> <span data-i18n="rtdir_loaditems">Load items</span>
+            </label>
+            <label class="v112-only" style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;">
+              <input type="checkbox" id="destLoadCargo" checked style="width:auto;"> <span data-i18n="rtdir_loadcargo">Load cargo fluid</span>
+            </label>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.5;" data-i18n="rtdir_note">Unchecking "Load" still unloads/drains at that end — it only skips loading new cargo before launch.</div>
+      </div>
+      <div class="section legacy-only">
         <div class="section-label" data-i18n="sec_transfer">Transfer Mode <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_transfer">Simple: bulk transfer. Manual: slot-by-slot.</div></span></div>
         <div class="mode-toggle">
           <button class="mode-btn active v112-only" id="btn-simple" onclick="setMode('simple',this)" data-i18n="mode_simple">⚡ Simple</button>
@@ -376,9 +386,9 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
           </div>
         </div>
       </div>
-      <div class="section">
+      <div class="section legacy-only v112-only">
         <div class="section-label" data-i18n="sec_fluidload">Cargo Fluid Load <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_fluidload">Hold the rocket on the pad until the cargo fluid tank reaches a target amount before launching.</div></span></div>
-        <div class="field v112-only">
+        <div class="field">
           <label data-i18n="lbl_fluidloadmode">Fluid Load Wait <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_fluidloadmode">Requires a fluid pipe feeding the TOP/SIDE face of the launchpad while waiting.</div></span></label>
           <select id="fluidLoadMode" onchange="toggleFluidLoadFields()">
             <option value="none" data-i18n="fluidload_none">Don't wait, launch as-is</option>
@@ -386,7 +396,7 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
             <option value="qty" data-i18n="fluidload_qty">Wait until a specific amount (mB)</option>
           </select>
         </div>
-        <div class="field v112-only" id="fluidLoadQtyField" style="display:none">
+        <div class="field" id="fluidLoadQtyField" style="display:none">
           <label data-i18n="lbl_fluidloadqty">Target Amount (mB) <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_fluidloadqty">Launch once the cargo tank holds at least this much fluid.</div></span></label>
           <input type="number" id="fluidLoadQty" value="8000" min="1">
         </div>
@@ -420,7 +430,7 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
       </div>
       <div class="stats" id="stats" style="display:none">
         <div class="stat-card"><div class="val" id="statLines">0</div><div class="lbl" data-i18n="stat_lines">Lines</div></div>
-        <div class="stat-card"><div class="val" id="statMode">—</div><div class="lbl" data-i18n="stat_mode">Mode</div></div>
+        <div class="stat-card"><div class="val" id="statMode">—</div><div class="lbl" id="statModeLabel" data-i18n="stat_mode">Grounded Wait</div></div>
         <div class="stat-card"><div class="val" id="statFuel">—</div><div class="lbl" data-i18n="stat_fuel">Fuel</div></div>
       </div>
       <div class="code-area">
@@ -460,10 +470,12 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
       </div>
       <div class="palette-section">
         <div class="palette-title" data-i18n="pal_action">Actions</div>
-        <div class="palette-block pb-load v112-only" draggable="true" data-type="load">📦 <span data-i18n="blk_load">Load Items</span></div>
+        <div class="palette-block pb-load v112-only" draggable="true" data-type="load">📦 <span data-i18n="blk_load">Load Items (legacy)</span></div>
+        <div class="palette-block pb-wait v112-only" draggable="true" data-type="groundedwait">🛑 <span data-i18n="blk_groundedwait">Wait Until Grounded (v1.2.4+)</span></div>
+        <div class="palette-block pb-unload v112-only" draggable="true" data-type="emptycheck">📭 <span data-i18n="blk_emptycheck">Wait Until Empty (v1.2.4+)</span></div>
         <div class="palette-block pb-launch" draggable="true" data-type="launch">🚀 <span data-i18n="blk_launch">Launch</span></div>
-        <div class="palette-block pb-wait" draggable="true" data-type="returnwait">⏳ <span data-i18n="blk_returnwait">Wait Return</span></div>
-        <div class="palette-block pb-unload v112-only" draggable="true" data-type="unload">📤 <span data-i18n="blk_unload">Unload Items</span></div>
+        <div class="palette-block pb-wait v112-only" draggable="true" data-type="returnwait">⏳ <span data-i18n="blk_returnwait">Wait Return (legacy)</span></div>
+        <div class="palette-block pb-unload v112-only" draggable="true" data-type="unload">📤 <span data-i18n="blk_unload">Unload Items (legacy)</span></div>
         <div class="palette-block pb-log" draggable="true" data-type="log">📝 <span data-i18n="blk_log">Print Message</span></div>
       </div>
     </div>
@@ -537,25 +549,27 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
 const T={
 en:{
   tab_gen:"⚙️ Generator",tab_vis:"🧩 Visual",tab_help:"📖 HELP",
-  sec_basic:"Basic Settings",sec_transfer:"Transfer Mode",
+  sec_basic:"Basic Settings",
   lbl_roundtrip:"Script Type",tip_roundtrip:"One-way: single launchpad sends items one direction. Round-trip: generates scripts for BOTH ends so the rocket returns automatically.",
   rt_oneway:"One-way (single script)",rt_roundtrip:"Round-trip (origin + destination)",
-  lbl_rtdir:"Per-Direction Cargo",tip_rtdir:"Choose whether items and cargo fluid are loaded at each end. Useful when cargo should only flow one way.",
-  rtdir_origin_hdr:"Origin →",rtdir_dest_hdr:"Destination →",rtdir_loaditems:"Load items",rtdir_loadcargo:"Load cargo fluid",
-  rtdir_note:"Unchecking \"Load\" still unloads/drains at that end — it only skips loading new cargo before launch.",
   lbl_pad:"Peripheral Name",tip_pad:"Direction or device name seen from the PC. Check with peripheral.getNames(). e.g. top, bottom, left",ph_pad:"top / bottom / cargo_rocket_launch_pad_0",
   lbl_origin:"Launch Origin",tip_origin:"The planet the rocket is currently on. Required tier = max(origin tier, destination tier).",
   lbl_dest:"Destination",tip_dest:"Target planet. Check with launch_pad.getValidDestinations().",
   tier_label:"Required Rocket Tier: ",tier_notes:["(any rocket)","(Tier 1+)","(Tier 2+)","(Tier 3+)","(Tier 4+)"],
   lbl_interval:"Energy Interval (sec)",tip_interval:"How often to recheck energy while waiting for a full charge.",
-  lbl_return:"Return Wait (sec)",tip_return:"How long to wait after launch for the rocket to return.",
+  lbl_return:"Grounded Wait (sec)",tip_return:"How long to wait after the rocket actually comes to a stop (not a fixed timer from launch) before it's eligible to be reloaded and relaunched. Gives you time to walk over and use the rocket's inventory screen.",
   lbl_fuelcheck:"Fuel Check",tip_fuelcheck:"Check fuel before launch. Supply via pipe to BOTTOM face of launchpad.",
   fuel_warn:"Warn if low",fuel_wait:"Wait until full",fuel_none:"Disabled",
   lbl_minfuel:"Min Fuel (mB)",tip_minfuel:"Min fuel needed before launch. Default 3000 mB = 3 buckets.",
-  lbl_cargocheck:"Cargo Fluid Check",tip_cargocheck:"Check cargo fluid after return. Supply/drain via TOP or SIDE face pipes.",
+  lbl_cargocheck:"Cargo Fluid Check",tip_cargocheck:"Checks the cargo fluid currently aboard the rocket itself (filled/drained by hand via the rocket's inventory screen).",
   cargo_log:"Log type and amount",cargo_wait_fill:"Wait until full",cargo_wait_empty:"Wait until empty",cargo_none:"Disabled",
   lbl_cargothreshold:"Cargo Threshold (mB)",tip_cargothreshold:"Target mB to wait for. 0 = empty, blank = full tank.",
-  mode_simple:"⚡ Simple",mode_manual:"🔧 Manual",
+  sec_loadwait:"Pre-Launch Check",tip_loadwait_v124:"Items and cargo fluid are now loaded/unloaded by hand from the rocket's own inventory screen (right-click the rocket while it's grounded). This script no longer transfers anything automatically — it only waits for energy/fuel and triggers the launch.",
+  lbl_requireempty:"Don't launch until the rocket's inventory is empty",tip_requireempty:"Safety check: if leftover cargo wasn't unloaded by hand last cycle, hold the rocket on the pad instead of launching it again with old items still aboard.",
+  lbl_rtdir:"Per-Direction Cargo",tip_rtdir:"Choose whether items and cargo fluid are loaded at each end. Useful when cargo should only flow one way.",
+  rtdir_origin_hdr:"Origin →",rtdir_dest_hdr:"Destination →",rtdir_loaditems:"Load items",rtdir_loadcargo:"Load cargo fluid",
+  rtdir_note:"Unchecking \"Load\" still unloads/drains at that end — it only skips loading new cargo before launch.",
+  sec_transfer:"Transfer Mode",mode_simple:"⚡ Simple",mode_manual:"🔧 Manual",
   tip_transfer:"Simple: use loadAllItems/unloadAllItems. Manual: specify each slot.",
   lbl_loadfilter:"Load Filter",tip_loadfilter:"Item ID filter. Blank = all items.",ph_loadfilter:"e.g. minecraft:cobblestone",
   lbl_unloadfilter:"Unload Filter",tip_unloadfilter:"Item ID filter for unloading. Blank = all.",ph_unloadfilter:"e.g. minecraft:iron_ore",
@@ -572,13 +586,13 @@ en:{
   lbl_scannername:"Set rocket name on launch",lbl_scannernamevalue:"Rocket Name",tip_scannernamevalue:"Shown in the Scanner GUI's rocket list. Max 32 characters.",ph_scannername:"e.g. Earth-Mars Shuttle",
   lbl_scannerstatus:"Report wait status to Scanner GUI",
   btn_addslot:"+ Add Slot",btn_generate:"⚡ Generate Script",btn_copy:"📋 Copy",btn_dl:"💾 Download",btn_copied:"✅ Copied!",
-  stat_lines:"Lines",stat_mode:"Mode",stat_fuel:"Fuel",placeholder_text:"Configure settings and generate your script",
+  stat_lines:"Lines",stat_mode:"Mode",stat_mode_v124:"Grounded Wait",stat_fuel:"Fuel",placeholder_text:"Configure settings and generate your script",
   slot_pad:"pad",slot_rocket:"rocket",
   orbit_earth:"(Earth Orbit)",orbit_moon:"(Moon Orbit)",orbit_mars:"(Mars Orbit)",orbit_mercury:"(Mercury Orbit)",orbit_venus:"(Venus Orbit)",orbit_glacio:"(Glacio Orbit)",
   // Visual Builder
   pal_control:"Control Flow",pal_check:"Checks",pal_action:"Actions",
   blk_loop:"Loop Forever",blk_energy:"Wait for Energy",blk_fuel:"Fuel Check",blk_rocketcheck:"Check Rocket",blk_cargo:"Cargo Fluid",
-  blk_load:"Load Items",blk_launch:"Launch",blk_returnwait:"Wait Return",blk_unload:"Unload Items",blk_log:"Print Message",
+  blk_load:"Load Items (legacy)",blk_groundedwait:"Wait Until Grounded (v1.2.4+)",blk_launch:"Launch",blk_returnwait:"Wait Return (legacy)",blk_unload:"Unload Items (legacy)",blk_emptycheck:"Wait Until Empty (v1.2.4+)",blk_log:"Print Message",
   canvas_title:"// Drag blocks here to build your script",canvas_empty:"Drag blocks from the left panel",
   btn_preset:"📋 Load Preset",btn_clear:"🗑 Clear",vb_placeholder:"Add blocks and generate script",
   // Block params
@@ -591,25 +605,27 @@ en:{
 },
 ja:{
   tab_gen:"⚙️ ジェネレーター",tab_vis:"🧩 ビジュアル",tab_help:"📖 HELP",
-  sec_basic:"基本設定",sec_transfer:"転送モード",
+  sec_basic:"基本設定",
   lbl_roundtrip:"スクリプトの種類",tip_roundtrip:"片道：1つの発射台のみで一方向に送る。往復：発射地点と目的地、両方のスクリプトを生成し、ロケットが自動で戻ってくるようにします。",
   rt_oneway:"片道（単一スクリプト）",rt_roundtrip:"往復（発射地点＋目的地）",
-  lbl_rtdir:"方向ごとの積み込み設定",tip_rtdir:"発射地点・目的地それぞれでアイテムとカーゴ流体を積むかどうかを選べます。片方向だけ輸送したい場合に便利です。",
-  rtdir_origin_hdr:"発射地点 →",rtdir_dest_hdr:"目的地 →",rtdir_loaditems:"アイテムを積む",rtdir_loadcargo:"カーゴ流体を積む",
-  rtdir_note:"「積む」のチェックを外しても、その場所での降ろし・排出は行われます。発射前に新たに積み込む処理だけスキップされます。",
   lbl_pad:"ペリフェラル名",tip_pad:"PCから見た発射台の方向名またはデバイス名。peripheral.getNames() で確認。例: top, bottom, left",ph_pad:"top / bottom / cargo_rocket_launch_pad_0",
   lbl_origin:"発射地点（現在地）",tip_origin:"ロケットが現在いる惑星。必要ティア = max(発射地点, 目的地)。",
   lbl_dest:"目的地",tip_dest:"目標の惑星。launch_pad.getValidDestinations() で確認できます。",
   tier_label:"必要ロケットティア：",tier_notes:["（どのロケットでもOK）","（Tier 1以上）","（Tier 2以上）","（Tier 3以上）","（Tier 4以上）"],
   lbl_interval:"エネルギー確認間隔（秒）",tip_interval:"エネルギーが足りない間、何秒ごとに再確認するか。",
-  lbl_return:"帰還待機時間（秒）",tip_return:"発射後、ロケットが帰還するまで何秒待つか。",
+  lbl_return:"停止待機時間（秒）",tip_return:"発射時の固定タイマーではなく、ロケットが実際に停止してからの経過秒数で判定します。この秒数が経過するまで、再度の積み込み・発射ができないようにし、ロケットのインベントリ画面を使う時間を確保します。",
   lbl_fuelcheck:"燃料チェック",tip_fuelcheck:"発射前に燃料を確認。発射台の底面（Bottom）にパイプで供給してください。",
   fuel_warn:"不足時に警告",fuel_wait:"満タンまで待機",fuel_none:"無効",
   lbl_minfuel:"最低必要燃料（mB）",tip_minfuel:"発射前に必要な最低燃料量。デフォルト 3000 mB = バケツ3個。",
-  lbl_cargocheck:"カーゴ流体チェック",tip_cargocheck:"帰還後のカーゴ流体を確認。上面・側面のパイプで供給・排出できます。",
+  lbl_cargocheck:"カーゴ流体チェック",tip_cargocheck:"ロケット自身が現在運んでいるカーゴ流体を確認します（ロケットのインベントリ画面から手動で注入・排出）。",
   cargo_log:"種類と量をログ出力",cargo_wait_fill:"満タンまで待機",cargo_wait_empty:"空になるまで待機",cargo_none:"無効",
   lbl_cargothreshold:"カーゴしきい値（mB）",tip_cargothreshold:"待機する目標量（mB）。0=空まで、空欄=満タンまで。",
-  mode_simple:"⚡ シンプル",mode_manual:"🔧 マニュアル",
+  sec_loadwait:"発射前チェック",tip_loadwait_v124:"アイテム・カーゴ流体は、ロケット自身のインベントリ画面（ロケットが停止中に右クリックで開く）から手動で積み込み・取り出しを行うようになりました。このスクリプトはもう自動転送を行わず、エネルギー・燃料の待機と発射のトリガーのみを行います。",
+  lbl_requireempty:"ロケットのインベントリが空になるまで発射しない",tip_requireempty:"安全装置: 前回の積み荷が手動で降ろされていない場合、古い荷物を積んだまま再発射せずに発射台で待機します。",
+  lbl_rtdir:"方向ごとの積み込み設定",tip_rtdir:"発射地点・目的地それぞれでアイテムとカーゴ流体を積むかどうかを選べます。片方向だけ輸送したい場合に便利です。",
+  rtdir_origin_hdr:"発射地点 →",rtdir_dest_hdr:"目的地 →",rtdir_loaditems:"アイテムを積む",rtdir_loadcargo:"カーゴ流体を積む",
+  rtdir_note:"「積む」のチェックを外しても、その場所での降ろし・排出は行われます。発射前に新たに積み込む処理だけスキップされます。",
+  sec_transfer:"転送モード",mode_simple:"⚡ シンプル",mode_manual:"🔧 マニュアル",
   tip_transfer:"シンプル: loadAllItems/unloadAllItems で一括転送。マニュアル: スロット番号を個別指定。",
   lbl_loadfilter:"ロードフィルター",tip_loadfilter:"アイテムIDでフィルター。空白 = 全アイテム。",ph_loadfilter:"例: minecraft:cobblestone",
   lbl_unloadfilter:"アンロードフィルター",tip_unloadfilter:"アンロード用フィルター。空白 = 全て。",ph_unloadfilter:"例: minecraft:iron_ore",
@@ -626,12 +642,12 @@ ja:{
   lbl_scannername:"発射時にロケット名を設定",lbl_scannernamevalue:"ロケット名",tip_scannernamevalue:"Scanner GUIのロケット一覧に表示されます。最大32文字。",ph_scannername:"例: 地球-火星シャトル",
   lbl_scannerstatus:"待機状態をScanner GUIへ報告",
   btn_addslot:"+ スロット追加",btn_generate:"⚡ スクリプト生成",btn_copy:"📋 コピー",btn_dl:"💾 DL",btn_copied:"✅ コピー完了！",
-  stat_lines:"行数",stat_mode:"モード",stat_fuel:"燃料",placeholder_text:"設定を入力してスクリプトを生成してください",
+  stat_lines:"行数",stat_mode:"モード",stat_mode_v124:"停止待機",stat_fuel:"燃料",placeholder_text:"設定を入力してスクリプトを生成してください",
   slot_pad:"発射台",slot_rocket:"ロケット",
   orbit_earth:"（地球の衛星軌道）",orbit_moon:"（月の衛星軌道）",orbit_mars:"（火星の衛星軌道）",orbit_mercury:"（水星の衛星軌道）",orbit_venus:"（金星の衛星軌道）",orbit_glacio:"（グラシオの衛星軌道）",
   pal_control:"制御フロー",pal_check:"確認",pal_action:"アクション",
   blk_loop:"ループ（無限）",blk_energy:"エネルギー待機",blk_fuel:"燃料チェック",blk_rocketcheck:"ロケット確認",blk_cargo:"カーゴ流体",
-  blk_load:"アイテム積み込み",blk_launch:"発射",blk_returnwait:"帰還待機",blk_unload:"アイテム降ろし",blk_log:"メッセージ表示",
+  blk_load:"アイテム積み込み（旧）",blk_groundedwait:"停止待機（v1.2.4+）",blk_launch:"発射",blk_returnwait:"帰還待機（旧）",blk_unload:"アイテム降ろし（旧）",blk_emptycheck:"空になるまで待機（v1.2.4+）",blk_log:"メッセージ表示",
   canvas_title:"// ブロックをここにドラッグしてスクリプトを組み立てる",canvas_empty:"左パネルからブロックをドラッグしてください",
   btn_preset:"📋 プリセット読込",btn_clear:"🗑 クリア",vb_placeholder:"ブロックを追加してスクリプトを生成してください",
   p_pad:"ペリフェラル",p_planet:"惑星",p_interval:"間隔(秒)",p_wait:"待機(秒)",p_minfuel:"最低燃料(mB)",p_filter:"フィルター",p_slot_pad:"発射台スロット",p_slot_rocket:"ロケットスロット",p_msg:"メッセージ",p_cargo_mode:"モード",
@@ -644,20 +660,24 @@ ja:{
 // ============================================================
 // LANG & TABS
 // ============================================================
-let lang='en',currentMode='simple',currentHelp='setup',modVer='v123';
+let lang='en',currentHelp='setup',modVer='v124';
 function setVer(v){modVer=v;applyVer();}
 function applyVer(){
   const is111=modVer==='v121';
-  const is123=modVer==='v123';
+  const is123OrLater=modVer==='v123'||modVer==='v124';
+  const is124=modVer==='v124';
   document.querySelectorAll('.v112-only').forEach(el=>el.style.display=is111?'none':'');
-  document.querySelectorAll('.v123-only').forEach(el=>el.style.display=is123?'':'none');
+  document.querySelectorAll('.v123-only').forEach(el=>el.style.display=is123OrLater?'':'none');
+  document.querySelectorAll('.v124-only').forEach(el=>el.style.display=is124?'':'none');
+  document.querySelectorAll('.legacy-only').forEach(el=>el.style.display=is124?'none':'');
   // v1.2.1ではSimpleモードが使えないのでManualに強制切替
   if(is111&&currentMode==='simple'){const mb=document.getElementById('btn-simple');if(mb){const manualBtn=document.querySelector('[onclick*="setMode\'manual"]');if(manualBtn)setMode('manual',manualBtn);}}
   // version-badge更新
-  const verLabel=is111?'v1.2.1':(is123?'v1.2.3':'v1.2.2');
+  const verLabel=is111?'v1.2.1':(is124?'v1.2.4':(modVer==='v123'?'v1.2.3':'v1.2.2'));
   document.querySelector('.version-badge').textContent='Forge 1.20.1 · '+verLabel;document.getElementById('verSelect').value=modVer;
   // v112-only の一括表示切替で個別の条件付き表示（qty系フィールド）が巻き戻るため再適用
-  if(!is111){toggleLoadWaitFields();toggleFluidLoadFields();}
+  if(!is111&&!is124){toggleLoadWaitFields();toggleFluidLoadFields();}
+  toggleRoundTrip();
   renderHelp(currentHelp);
 }
 function setLang(l){lang=l;applyTranslations();renderHelp(currentHelp);}
@@ -682,12 +702,17 @@ const TIER={"minecraft:overworld":0,"ad_astra:earth_orbit":1,"ad_astra:moon":1,"
 function calcTier(){const req=Math.max(TIER[document.getElementById('origin').value]??0,TIER[document.getElementById('planet').value]??0);const colors=['var(--green)','var(--accent2)','var(--amber)','#fb923c','var(--red)'];const el=document.getElementById('tierResult');el.style.display='block';document.getElementById('tierVal').textContent='Tier '+req;document.getElementById('tierVal').style.color=colors[req];document.getElementById('tierNote').textContent=T[lang].tier_notes[req];}
 
 // ============================================================
-// GENERATOR MODES & SLOTS
+// GENERATOR OPTIONS
 // ============================================================
+function toggleScannerNameField(){document.getElementById('scannerNameField').style.display=document.getElementById('scannerSetName').checked?'block':'none';}
+
+// ============================================================
+// LEGACY (v1.2.1-v1.2.3) GENERATOR MODES & SLOTS
+// ============================================================
+let currentMode='simple';
 function setMode(mode,btn){currentMode=mode;document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.mode-panel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById('mode-'+mode).classList.add('active');}
 function toggleLoadWaitFields(){const v=document.getElementById('loadWaitMode').value;document.getElementById('loadWaitQtyFields').style.display=v==='qty'?'grid':'none';}
 function toggleFluidLoadFields(){const v=document.getElementById('fluidLoadMode').value;document.getElementById('fluidLoadQtyField').style.display=v==='qty'?'block':'none';}
-function toggleScannerNameField(){document.getElementById('scannerNameField').style.display=document.getElementById('scannerSetName').checked?'block':'none';}
 addLoad(10,1);addUnload(1,10);
 function addLoad(ps=10,rs=1){const el=document.createElement('div');el.className='slot-item';const pl=T[lang].slot_pad,rl=T[lang].slot_rocket;el.innerHTML=`<span>${pl}</span><input type="number" class="ps" value="${ps}" min="1" max="27"><div class="arrow">→</div><span>${rl}</span><input type="number" class="rs" value="${rs}" min="1" max="27"><button class="del-btn" onclick="this.parentElement.remove()">×</button>`;document.getElementById('loadSlots').appendChild(el);}
 function addUnload(rs=1,ps=10){const el=document.createElement('div');el.className='slot-item';const pl=T[lang].slot_pad,rl=T[lang].slot_rocket;el.innerHTML=`<span>${rl}</span><input type="number" class="rs" value="${rs}" min="1" max="27"><div class="arrow">→</div><span>${pl}</span><input type="number" class="ps" value="${ps}" min="1" max="27"><button class="del-btn" onclick="this.parentElement.remove()">×</button>`;document.getElementById('unloadSlots').appendChild(el);}
@@ -700,7 +725,105 @@ function hl(code){return code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 // ============================================================
 // GENERATE
 // ============================================================
-function buildCode(cfg){
+function buildCodeV124(cfg){
+  const{pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,isDestination,requireEmptyBeforeLaunch,scannerSetName,scannerNameValue,scannerSetStatus}=cfg;
+
+  // Rocket Scanner integration (v1.2.3+): report live wait-status text to the
+  // Scanner GUI. Wrapped in pcall so this is silently skipped on older mod
+  // versions where setRocketStatus/setRocketName don't exist.
+  const setStatus = (msg, indent='    ') => scannerSetStatus
+    ? `\n${indent}pcall(function() launch_pad.setRocketStatus(${msg}) end)`
+    : '';
+  const nameLine = (scannerSetName && scannerNameValue)
+    ? `    pcall(function() launch_pad.setRocketName("${scannerNameValue}") end)\n`
+    : '';
+
+  let fuelBlock='';
+  if(fuelCheck==='wait'){fuelBlock=`\n  -- Wait for fuel (now stored in the rocket itself, fill it via its inventory screen)\n  while true do\n    local fuel = launch_pad.getFuel()\n    print("[FUEL] " .. fuel .. " / ${minFuel} mB")\n    if fuel >= ${minFuel} then print("[OK] Fuel ready") break end${setStatus('"Waiting for fuel: " .. fuel .. "/' + minFuel + ' mB"', '    ')}\n    sleep(ENERGY_INTERVAL)\n  end\n`;}
+  else if(fuelCheck==='warn'){fuelBlock=`\n  local fuel = launch_pad.getFuel()\n  if fuel < ${minFuel} then print("[WARN] Low fuel: " .. fuel .. " mB") else print("[OK] Fuel: " .. fuel .. " mB") end\n`;}
+
+  // Cargo fluid check: the cargo tank now lives on the rocket itself and is
+  // filled/drained by hand via its inventory screen, so this just reports or
+  // waits on that value rather than triggering any automatic transfer.
+  let cargoBlock='';
+  if(cargoCheck==='log'){cargoBlock=`\n    print("[CARGO] " .. launch_pad.getCargoFluidType() .. " : " .. launch_pad.getCargoFluid() .. " mB")`;}
+  else if(cargoCheck==='wait_empty'){cargoBlock=`\n    while true do\n      local cf=launch_pad.getCargoFluid()\n      print("[CARGO] " .. cf .. " mB still aboard")\n      if cf<=${cargoThreshold} then print("[OK] Cargo unloaded") break end${setStatus('"Waiting for cargo to be unloaded: " .. cf .. " mB"', '      ')}\n      sleep(ENERGY_INTERVAL)\n    end`;}
+
+  // Safety check: don't relaunch a rocket that still has leftover items aboard
+  // (e.g. nobody emptied it by hand since the last trip).
+  let emptyCheckBlock='';
+  if(requireEmptyBeforeLaunch){
+    emptyCheckBlock=`\n    -- Wait until the rocket's inventory has been emptied by hand before launching\n    while not launch_pad.isRocketInventoryEmpty() do\n      print("[WAIT] Rocket still has cargo aboard, waiting for it to be unloaded...")${setStatus('"Waiting for rocket to be unloaded by hand"', '      ')}\n      sleep(ENERGY_INTERVAL)\n    end\n`;
+  }
+
+  const roleLabel=isDestination?'Destination':'Origin';
+  const clearStatusLine = scannerSetStatus
+    ? `\n    pcall(function() launch_pad.setRocketStatus("") end)`
+    : '';
+  return `-- ============================================
+-- Cargo Rocket Automation Script (${roleLabel})
+-- Ad Astra + CC:Tweaked
+--
+-- v1.2.4: items and cargo fluid are loaded/unloaded by hand from the
+-- rocket's own inventory screen (right-click the rocket while grounded).
+-- This script only watches energy/fuel and triggers the launch -- it does
+-- not move any items or fluid itself.
+-- ============================================
+
+local PERIPHERAL      = "${pad}"
+local PLANET          = "${planet}"
+local ENERGY_INTERVAL = ${interval}
+local GROUNDED_WAIT   = ${returnWait}
+local MIN_FUEL        = ${minFuel}
+
+local launch_pad = peripheral.wrap(PERIPHERAL)
+if not launch_pad then error("Launch pad not found: " .. PERIPHERAL) end
+
+print("[BOOT] Cargo Rocket automation started (${roleLabel})")
+print("[INFO] Destination: " .. PLANET)
+
+while true do
+
+  -- Wait for energy
+  while true do
+    local energy = launch_pad.getEnergy()
+    local required = launch_pad.getEnergyRequiredForLaunch()
+    print("[ENERGY] " .. energy .. " / " .. required)
+    if energy >= required then print("[OK] Energy charged") break end${setStatus('"Waiting for energy: " .. energy .. "/" .. required', '    ')}
+    sleep(ENERGY_INTERVAL)
+  end
+${fuelBlock}
+  if not launch_pad.isRocketPresent() then
+    print("[WARN] No rocket. Waiting...")
+    sleep(ENERGY_INTERVAL)
+  else
+    -- Make sure the rocket has actually been sitting still for GROUNDED_WAIT
+    -- seconds (real time since it stopped moving, not a fixed timer from
+    -- launch) so there's time to load/unload it by hand before it leaves again.
+    while launch_pad.getSecondsSinceLanded() < GROUNDED_WAIT do
+      local waited = launch_pad.getSecondsSinceLanded()
+      print("[WAIT] Grounded for " .. waited .. "/" .. GROUNDED_WAIT .. " sec")${setStatus('"Grounded: " .. waited .. "/" .. GROUNDED_WAIT .. " sec"', '      ')}
+      sleep(ENERGY_INTERVAL)
+    end
+${emptyCheckBlock}${nameLine}${clearStatusLine}${cargoBlock}
+    print("[LAUNCH] Launching to " .. PLANET)
+    local ok, err = pcall(function() launch_pad.launch(PLANET) end)
+    if not ok then
+      print("[ERROR] " .. tostring(err))${setStatus('"Error: " .. tostring(err)', '      ')}
+      sleep(ENERGY_INTERVAL)
+    else
+      print("[LAUNCHED] Rocket is on its way.")
+    end
+  end
+
+end`;
+}
+
+/**
+ * v1.2.1〜v1.2.3向けの生成ロジック。loadAllItems/unloadAllItems等の
+ * ランチパッド↔ロケット自動転送APIを使う（v1.2.4で廃止される前の挙動）。
+ */
+function buildCodeLegacy(cfg){
   const{pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,isDestination,loadWaitMode,loadWaitItem,loadWaitQty,fluidLoadMode,fluidLoadQty,scannerSetName,scannerNameValue,scannerSetStatus}=cfg;
   const loadItems=cfg.loadItems!==false;
   const loadCargo=cfg.loadCargo!==false;
@@ -826,52 +949,73 @@ end`;
 }
 
 function generate(){
+  const is124=modVer==='v124';
   const pad=document.getElementById('padName').value.trim()||'top';
   const planet=document.getElementById('planet').value||'minecraft:overworld';
   const origin=document.getElementById('origin').value||'minecraft:overworld';
   const interval=parseInt(document.getElementById('energyInterval').value)||5;
-  const returnWait=parseInt(document.getElementById('returnWait').value)||30;
+  const returnWait=parseInt(document.getElementById('returnWait').value)||0;
   const fuelCheck=modVer!=='v121'?document.getElementById('fuelCheck').value:'none';
   const minFuel=parseInt(document.getElementById('minFuel').value)||3000;
   const cargoCheck=modVer!=='v121'?document.getElementById('cargoCheck').value:'none';
   const cargoThreshold=parseInt(document.getElementById('cargoThreshold').value)||0;
   const isRoundTrip=document.getElementById('roundTrip').value==='roundtrip';
-  // Per-direction load toggles (only meaningful for round-trip; one-way always loads)
-  const originLoadItems=isRoundTrip?document.getElementById('originLoadItems').checked:true;
-  const originLoadCargo=isRoundTrip&&modVer!=='v121'?document.getElementById('originLoadCargo').checked:true;
-  const destLoadItems=isRoundTrip?document.getElementById('destLoadItems').checked:true;
-  const destLoadCargo=isRoundTrip&&modVer!=='v121'?document.getElementById('destLoadCargo').checked:true;
-  // Item load-wait (Simple mode only — slot-based Manual mode doesn't have a "full" concept)
-  const loadWaitMode=(currentMode==='simple'&&modVer!=='v121')?document.getElementById('loadWaitMode').value:'none';
-  const loadWaitItem=document.getElementById('loadWaitItem').value.trim();
-  const loadWaitQty=parseInt(document.getElementById('loadWaitQty').value)||64;
-  // Cargo fluid load-wait
-  const fluidLoadMode=modVer!=='v121'?document.getElementById('fluidLoadMode').value:'none';
-  const fluidLoadQty=parseInt(document.getElementById('fluidLoadQty').value)||8000;
-  // Rocket Scanner integration (v1.2.3+ only)
-  const scannerSetName=modVer==='v123'&&document.getElementById('scannerSetName').checked;
+  // Rocket Scanner integration (v1.2.3+)
+  const is123OrLater=modVer==='v123'||modVer==='v124';
+  const scannerSetName=is123OrLater&&document.getElementById('scannerSetName').checked;
   const scannerNameValue=document.getElementById('scannerNameValue').value.trim().slice(0,32);
-  const scannerSetStatus=modVer==='v123'&&document.getElementById('scannerSetStatus').checked;
-  let loadLine,unloadLine;
-  if(currentMode==='simple'&&modVer!=='v121'){const lf=document.getElementById('loadFilter').value.trim();const uf=document.getElementById('unloadFilter').value.trim();loadLine=lf?`  launch_pad.loadAllItems("${lf}")`:`  launch_pad.loadAllItems()`;unloadLine=uf?`  launch_pad.unloadAllItems("${uf}")`:`  launch_pad.unloadAllItems()`;}
-  else{const loads=[...document.querySelectorAll('#loadSlots .slot-item')].map(r=>({ps:r.querySelector('.ps').value,rs:r.querySelector('.rs').value}));const unloads=[...document.querySelectorAll('#unloadSlots .slot-item')].map(r=>({rs:r.querySelector('.rs').value,ps:r.querySelector('.ps').value}));loadLine=loads.length?loads.map(s=>`  launch_pad.moveItemsFromLaunchPadToRocket(${s.ps},${s.rs})`).join('\n'):'  -- no load slots';unloadLine=unloads.length?unloads.map(s=>`  launch_pad.moveItemsFromRocketToLaunchPad(${s.rs},${s.ps})`).join('\n'):'  -- no unload slots';}
+  const scannerSetStatus=is123OrLater&&document.getElementById('scannerSetStatus').checked;
 
-  const baseCfg={pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,loadLine,unloadLine,loadWaitMode,loadWaitItem,loadWaitQty,fluidLoadMode,fluidLoadQty,scannerSetName,scannerNameValue,scannerSetStatus};
-  const code=buildCode({...baseCfg,isDestination:false,loadItems:originLoadItems,loadCargo:originLoadCargo});
+  const baseCfg={pad,planet,interval,returnWait,fuelCheck,minFuel,cargoCheck,cargoThreshold,scannerSetName,scannerNameValue,scannerSetStatus};
+
+  let code,code2;
+  if(is124){
+    // v1.2.4: no transfer logic, just energy/fuel waits + grounded-wait + optional empty check
+    const requireEmptyBeforeLaunch=document.getElementById('requireEmptyBeforeLaunch').checked;
+    const cfg124={...baseCfg,requireEmptyBeforeLaunch};
+    code=buildCodeV124({...cfg124,isDestination:false});
+    code2=isRoundTrip?buildCodeV124({...cfg124,planet:origin,isDestination:true}):null;
+  } else {
+    // v1.2.1-v1.2.3: legacy automatic launchpad<->rocket transfer
+    const originLoadItems=isRoundTrip?document.getElementById('originLoadItems').checked:true;
+    const originLoadCargo=isRoundTrip&&modVer!=='v121'?document.getElementById('originLoadCargo').checked:true;
+    const destLoadItems=isRoundTrip?document.getElementById('destLoadItems').checked:true;
+    const destLoadCargo=isRoundTrip&&modVer!=='v121'?document.getElementById('destLoadCargo').checked:true;
+    const loadWaitMode=(currentMode==='simple'&&modVer!=='v121')?document.getElementById('loadWaitMode').value:'none';
+    const loadWaitItem=document.getElementById('loadWaitItem').value.trim();
+    const loadWaitQty=parseInt(document.getElementById('loadWaitQty').value)||64;
+    const fluidLoadMode=modVer!=='v121'?document.getElementById('fluidLoadMode').value:'none';
+    const fluidLoadQty=parseInt(document.getElementById('fluidLoadQty').value)||8000;
+    let loadLine,unloadLine;
+    if(currentMode==='simple'&&modVer!=='v121'){
+      const lf=document.getElementById('loadFilter').value.trim();
+      const uf=document.getElementById('unloadFilter').value.trim();
+      loadLine=lf?`  launch_pad.loadAllItems("${lf}")`:`  launch_pad.loadAllItems()`;
+      unloadLine=uf?`  launch_pad.unloadAllItems("${uf}")`:`  launch_pad.unloadAllItems()`;
+    } else {
+      const loads=[...document.querySelectorAll('#loadSlots .slot-item')].map(r=>({ps:r.querySelector('.ps').value,rs:r.querySelector('.rs').value}));
+      const unloads=[...document.querySelectorAll('#unloadSlots .slot-item')].map(r=>({rs:r.querySelector('.rs').value,ps:r.querySelector('.ps').value}));
+      loadLine=loads.length?loads.map(s=>`  launch_pad.moveItemsFromLaunchPadToRocket(${s.ps},${s.rs})`).join('\n'):'  -- no load slots';
+      unloadLine=unloads.length?unloads.map(s=>`  launch_pad.moveItemsFromRocketToLaunchPad(${s.rs},${s.ps})`).join('\n'):'  -- no unload slots';
+    }
+    const cfgLegacy={...baseCfg,loadLine,unloadLine,loadWaitMode,loadWaitItem,loadWaitQty,fluidLoadMode,fluidLoadQty};
+    code=buildCodeLegacy({...cfgLegacy,isDestination:false,loadItems:originLoadItems,loadCargo:originLoadCargo});
+    code2=isRoundTrip?buildCodeLegacy({...cfgLegacy,planet:origin,isDestination:true,loadItems:destLoadItems,loadCargo:destLoadCargo}):null;
+  }
+
   window._code=code;
   document.getElementById('placeholder').style.display='none';
   const block=document.getElementById('codeBlock');block.style.display='block';block.innerHTML=hl(code);
   document.getElementById('stats').style.display='grid';
   document.getElementById('statLines').textContent=code.split('\n').length;
-  document.getElementById('statMode').textContent=currentMode==='simple'?'Simple':'Manual';
+  document.getElementById('statMode').textContent=is124?(returnWait+'s'):(currentMode==='simple'?'Simple':'Manual');
+  document.getElementById('statModeLabel').textContent=is124?T[lang].stat_mode_v124:T[lang].stat_mode;
   document.getElementById('statFuel').textContent=fuelCheck==='none'?'OFF':fuelCheck==='wait'?'WAIT':'WARN';
 
   const destBlockEl=document.getElementById('destOutputBlock');
   if(isRoundTrip){
     document.getElementById('outputTitle1').textContent=`// startup.lua (${origin})`;
     document.getElementById('outputTitle2').textContent=`// startup.lua (${planet})`;
-    // Destination script launches back to the origin
-    const code2=buildCode({...baseCfg,planet:origin,isDestination:true,loadItems:destLoadItems,loadCargo:destLoadCargo});
     window._code2=code2;
     const block2=document.getElementById('codeBlock2');block2.innerHTML=hl(code2);
     destBlockEl.style.display='block';
@@ -887,7 +1031,8 @@ function copyCode2(){if(!window._code2)return;navigator.clipboard.writeText(wind
 function downloadCode2(){if(!window._code2)return;const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(window._code2);a.download='startup_destination.lua';a.click();}
 function toggleRoundTrip(){
   const isRT=document.getElementById('roundTrip').value==='roundtrip';
-  document.getElementById('roundTripDirField').style.display=isRT?'block':'none';
+  const dirField=document.getElementById('legacyRoundTripDirField');
+  if(dirField)dirField.style.display=(isRT&&modVer!=='v124')?'block':'none';
   if(!isRT){document.getElementById('destOutputBlock').style.display='none';}
 }
 
@@ -904,9 +1049,11 @@ const BLOCK_DEFS={
   rocketcheck:{icon:'🚀',cls:'pb-check',label:()=>T[lang].blk_rocketcheck,params:[]},
   cargo:{icon:'🧪',cls:'pb-cargo',label:()=>T[lang].blk_cargo,params:[{key:'cargo_mode',type:'select',def:'log',opts:['log','wait_fill','wait_empty']}]},
   load:{icon:'📦',cls:'pb-load',label:()=>T[lang].blk_load,params:[{key:'filter',type:'text',def:''}]},
-  launch:{icon:'🚀',cls:'pb-launch',label:()=>T[lang].blk_launch,params:[{key:'planet',type:'text',def:'minecraft:overworld'}]},
+  groundedwait:{icon:'🛑',cls:'pb-wait',label:()=>T[lang].blk_groundedwait,params:[{key:'wait',type:'number',def:30}]},
+  emptycheck:{icon:'📭',cls:'pb-unload',label:()=>T[lang].blk_emptycheck,params:[]},
   returnwait:{icon:'⏳',cls:'pb-wait',label:()=>T[lang].blk_returnwait,params:[{key:'wait',type:'number',def:30}]},
   unload:{icon:'📤',cls:'pb-unload',label:()=>T[lang].blk_unload,params:[{key:'filter',type:'text',def:''}]},
+  launch:{icon:'🚀',cls:'pb-launch',label:()=>T[lang].blk_launch,params:[{key:'planet',type:'text',def:'minecraft:overworld'}]},
   log:{icon:'📝',cls:'pb-log',label:()=>T[lang].blk_log,params:[{key:'msg',type:'text',def:'Hello!'}]},
 };
 
@@ -1003,10 +1150,9 @@ function loadPreset(){
     {type:'energy',params:{pad:'top',interval:5}},
     {type:'fuel',params:{minfuel:3000,fuel_mode:'wait'}},
     {type:'rocketcheck',params:{}},
-    {type:'load',params:{filter:''}},
+    {type:'groundedwait',params:{wait:30}},
+    {type:'emptycheck',params:{}},
     {type:'launch',params:{planet:'minecraft:overworld'}},
-    {type:'returnwait',params:{wait:30}},
-    {type:'unload',params:{filter:''}},
     {type:'cargo',params:{cargo_mode:'log'}},
   ];
   renderVisualBlocks();
@@ -1053,6 +1199,11 @@ function vbGenerate(){
         if(p.filter&&p.filter!==''){lines.push(ind()+`launch_pad.loadAllItems("${p.filter}")`);}
         else{lines.push(ind()+'launch_pad.loadAllItems()');}
         break;
+      case 'groundedwait':
+        lines.push(ind()+`while launch_pad.getSecondsSinceLanded() < ${p.wait||30} do`);indent++;
+        lines.push(ind()+'print("[WAIT] Grounded for " .. launch_pad.getSecondsSinceLanded() .. "/' + (p.wait||30) + ' sec")');
+        lines.push(ind()+'sleep(ENERGY_INTERVAL)');
+        indent--;lines.push(ind()+'end');break;
       case 'launch':
         lines.push(ind()+`local ok, err = pcall(function() launch_pad.launch("${p.planet||'minecraft:overworld'}") end)`);
         lines.push(ind()+'if not ok then print("[ERROR] " .. tostring(err)) else');indent++;break;
@@ -1063,6 +1214,11 @@ function vbGenerate(){
         if(p.filter&&p.filter!==''){lines.push(ind()+`launch_pad.unloadAllItems("${p.filter}")`);}
         else{lines.push(ind()+'launch_pad.unloadAllItems()');}
         break;
+      case 'emptycheck':
+        lines.push(ind()+'while not launch_pad.isRocketInventoryEmpty() do');indent++;
+        lines.push(ind()+'print("[WAIT] Rocket still has cargo aboard...")');
+        lines.push(ind()+'sleep(ENERGY_INTERVAL)');
+        indent--;lines.push(ind()+'end');break;
       case 'cargo':
         if(p.cargo_mode==='log'){lines.push(ind()+'print("[CARGO] " .. launch_pad.getCargoFluidType() .. " : " .. launch_pad.getCargoFluid() .. " mB")');}
         else if(p.cargo_mode==='wait_fill'){lines.push(ind()+'while launch_pad.getCargoFluid() < launch_pad.getMaxCargoFluid() do sleep(ENERGY_INTERVAL) end');}
@@ -1134,9 +1290,20 @@ ${steps(isJa?[
 
 function renderFuel(){
   const isJa=lang==='ja';
+  const is124=modVer==='v124';
   return`<div class="page-title">${isJa?'燃料の設定':'Fuel Setup'}</div>
-<p class="page-desc">${isJa?'ロケットにはFEエネルギーとは別に液体燃料が必要です。':'Rockets require liquid fuel separate from FE energy.'}</p>
-<h2>${isJa?'発射台の接続面':'Launchpad Fluid Connections'}</h2>
+<p class="page-desc">${isJa?(is124?'ロケットにはFEエネルギーとは別に液体燃料が必要です。v1.2.4以降、燃料タンクはロケット自身が持っています。':'ロケットにはFEエネルギーとは別に液体燃料が必要です。'):(is124?'Rockets require liquid fuel separate from FE energy. Since v1.2.4, the fuel tank lives on the rocket itself.':'Rockets require liquid fuel separate from FE energy.')}</p>
+${is124?`<div class="warn-box">${isJa?'v1.2.4の変更: 燃料は発射台ではなくロケット自身のタンクに保存されます。発射台にパイプで燃料を送る仕様は廃止されました。':'v1.2.4 change: fuel is now stored in the rocket\'s own tank, not the launchpad. Piping fuel into the launchpad is no longer supported.'}</div>
+<h2>${isJa?'燃料の供給方法':'Supplying Fuel'}</h2>
+${steps(isJa?[
+  {t:'ロケットを右クリック',d:'ロケットが地上で停止している間に右クリックすると、インベントリ画面が開きます。'},
+  {t:'燃料バケツをスロットに入れる',d:'燃料バケツ（または対応する流体のバケツ）をGUI内の専用スロットに置くと、自動的にタンクへ注がれ空バケツに変わります。'},
+  {t:'タンクから汲み出す',d:'同じスロットに空バケツを置くと、タンクから1000 mB汲み出して満タンのバケツに変わります。'},
+]:[
+  {t:'Right-click the rocket',d:'While the rocket is grounded, right-click it to open its inventory screen.'},
+  {t:'Place a fuel bucket in the slot',d:'Drop a bucket of fuel (or any compatible fluid) into the dedicated slot in the GUI — it empties into the tank and the bucket becomes empty.'},
+  {t:'Draw fuel back out',d:'Place an empty bucket in the same slot to draw 1000 mB out of the tank, turning it into a full bucket.'},
+])}`:`<h2>${isJa?'発射台の接続面':'Launchpad Fluid Connections'}</h2>
 <table class="fluid-table"><thead><tr><th>${isJa?'面':'Face'}</th><th>${isJa?'機能':'Function'}</th></tr></thead><tbody>
 <tr><td>⬇️ <strong>Bottom</strong></td><td>${isJa?'燃料タンク入力専用 — 燃料パイプをここに接続':'Fuel tank input only — connect fuel pipes here'}</td></tr>
 <tr><td>⬆️ Top / Sides</td><td>${isJa?'カーゴ流体タンク（入力・出力）':'Cargo fluid tank (input &amp; output)'}</td></tr>
@@ -1149,21 +1316,36 @@ ${steps(isJa?[
 ]:[
   {t:'Manual (bucket)',d:'Right-click the bottom face with a fuel bucket. 3000 mB (3 buckets) needed for launch.'},
   {t:'Automatic (pipe)',d:'Connect a fluid pipe to the bottom face. Pipe from a Fuel Refinery.'},
-])}
+])}`}
 <h2>${isJa?'燃料の種類':'Fuel Types'}</h2>
 <p>${isJa?'通常燃料:':'Standard:'} <code>ad_astra:fuel</code><br>${isJa?'クライオ燃料:':'Cryo fuel:'} <code>ad_astra:cryo_fuel</code> ${isJa?'（高ティアロケット用）':'(for higher tier rockets)'}</p>
 <h2>${isJa?'Luaで燃料を確認（v1.2.2+）':'Check Fuel via Lua (v1.2.2+)'}</h2>
 <pre>launch_pad = peripheral.wrap("top")\nprint(launch_pad.getFuel() .. " / " .. launch_pad.getMaxFuel())\nprint(launch_pad.getFuelType())</pre>
-<div class="hint">${isJa?'v1.2.1では燃料APIは使えません。燃料は手動またはパイプで補充してください。':'Fuel API is not available in v1.2.1. Supply fuel manually or via pipe.'}</div>`;
+<div class="hint">${is124?(isJa?'これらのAPIはロケット自身のタンクの値を返します（v1.2.1では燃料APIは使えません）。':'These APIs return values from the rocket\'s own tank (not available at all in v1.2.1).'):(isJa?'v1.2.1では燃料APIは使えません。燃料は手動またはパイプで補充してください。':'Fuel API is not available in v1.2.1. Supply fuel manually or via pipe.')}</div>`;
 }
 
 function renderFluid(){
   const isJa=lang==='ja';
+  const is124=modVer==='v124';
   return`<div class="page-title">${isJa?'液体輸送':'Fluid Transport'}</div>
-<p class="page-desc">${isJa?'ロケットで液体を惑星間輸送する方法です（v1.2.2+）。':'How to transport liquids between planets using rockets (v1.2.2+).'}</p>
+<p class="page-desc">${isJa?(is124?'ロケットで液体を惑星間輸送する方法です（v1.2.2+）。v1.2.4以降、カーゴ流体タンクもロケット自身が持っています。':'ロケットで液体を惑星間輸送する方法です（v1.2.2+）。'):(is124?'How to transport liquids between planets using rockets (v1.2.2+). Since v1.2.4, the cargo fluid tank also lives on the rocket itself.':'How to transport liquids between planets using rockets (v1.2.2+).')}</p>
 <div class="warn-box">${isJa?'この機能はv1.2.2以上が必要です。v1.2.1では液体APIが使えません。':'This feature requires v1.2.2+. Fluid API is not available in v1.2.1.'}</div>
 <h2>${isJa?'仕組み':'How It Works'}</h2>
-<p>${isJa?'発射台の上面・側面はカーゴ流体タンクに接続されています。ここに流体パイプを繋ぐことで液体を自動的に積み込み・降ろしできます。':'The top and side faces of the launchpad connect to the cargo fluid tank. Attach fluid pipes here to automatically load and unload liquids.'}</p>
+${is124?`<p>${isJa?'ロケットを右クリックすると開くインベントリ画面に、カーゴ流体専用のバケツスロットがあります。発射台のパイプによる自動搬入・搬出は廃止されました。':'The rocket\'s inventory screen (opened by right-clicking it) has a dedicated bucket slot for cargo fluid. Automatic pipe-based loading/unloading on the launchpad has been removed.'}</p>
+<div class="warn-box">${isJa?'液体の積み込み・取り出しは、ロケットのGUIでバケツを使って手動で行います。CCのAPIはあくまで残量の確認・待機のみです。':'Loading and draining liquid is done by hand with buckets in the rocket\'s GUI. The CC API only monitors levels and waits.'}</div>
+${steps(isJa?[
+  {t:'ロケットを右クリック（地上停止中）',d:'インベントリ画面が開きます。'},
+  {t:'カーゴ流体バケツをスロットに入れる',d:'満タンのバケツを置くとタンクに注がれ空バケツに変わります。'},
+  {t:'「カーゴ流体チェック」を設定',d:'ジェネレーターで必要に応じてログ出力や空チェックを設定できます。'},
+  {t:'発射',d:'液体を積んだロケットが目的地へ発射されます。'},
+  {t:'目的地でロケットを右クリックして取り出す',d:'帰還後、目的地側でロケットのGUIから空バケツを使って液体を取り出します。'},
+]:[
+  {t:'Right-click the rocket while grounded',d:'Opens its inventory screen.'},
+  {t:'Place a cargo fluid bucket in the slot',d:'A full bucket empties into the tank and becomes an empty bucket.'},
+  {t:'Set up "Cargo Fluid Check" if needed',d:'The generator can log the cargo level or wait until it\'s emptied.'},
+  {t:'Launch',d:'Rocket launches with liquid cargo to the destination.'},
+  {t:'Right-click at the destination to drain',d:'After arrival, use an empty bucket in the rocket\'s GUI at the destination to extract the fluid.'},
+])}`:`<p>${isJa?'発射台の上面・側面はカーゴ流体タンクに接続されています。ここに流体パイプを繋ぐことで液体を自動的に積み込み・降ろしできます。':'The top and side faces of the launchpad connect to the cargo fluid tank. Attach fluid pipes here to automatically load and unload liquids.'}</p>
 <div class="warn-box">${isJa?'液体の移動自体はパイプで行います。CCのAPIはあくまで残量の確認・待機のみです。':'Fluid movement is handled by pipes. The CC API only monitors levels and waits.'}</div>
 ${steps(isJa?[
   {t:'積み込み地点にパイプを設置',d:'発射台の上面・側面に流体パイプを繋ぎ、タンクから液体を注入。'},
@@ -1175,11 +1357,12 @@ ${steps(isJa?[
   {t:'Set "Cargo Fluid Check" to wait until full',d:'The script waits until the tank is full before proceeding.'},
   {t:'Launch',d:'Rocket launches with liquid cargo to the destination.'},
   {t:'Drain at destination',d:'Pipes on the destination launchpad extract the fluid after return.'},
-])}`;
+])}`}`;
 }
 
 function renderScript(){
   const isJa=lang==='ja';
+  const is124=modVer==='v124';
   return`<div class="page-title">${isJa?'スクリプトの使い方':'Script Usage'}</div>
 <p class="page-desc">${isJa?'生成したLuaスクリプトをComputerCraftのPCに保存して実行する方法です。':'How to save and run the generated Lua script on a CC:Tweaked computer.'}</p>
 <h2>${isJa?'ファイルの保存方法':'Saving the Script'}</h2>
@@ -1198,7 +1381,7 @@ ${steps(isJa?[
   {t:'Auto-start (startup.lua)',d:'Name the file startup.lua to run automatically on PC boot. Use reboot to restart.'},
   {t:'Stop',d:'Press Ctrl+T while the PC is open to terminate the program.'},
 ])}
-<div class="hint">${isJa?'スロット1〜9はホッパー用インプットスロットです。マニュアルモードでは10番以降を使ってください。':'Slots 1–9 are input slots for hoppers. Use slot 10+ in Manual mode.'}</div>`;
+<div class="hint">${is124?(isJa?'アイテムやカーゴ流体の積み込み・取り出しは、ロケットを右クリックして開くインベントリ画面から手動で行います。このスクリプトはエネルギー・燃料の待機と発射のみを行います。':'Loading and unloading items or cargo fluid is done by hand via the rocket\'s own inventory screen (right-click the rocket). This script only waits for energy/fuel and triggers the launch.'):(isJa?'スロット1〜9はホッパー用インプットスロットです。マニュアルモードでは10番以降を使ってください。':'Slots 1–9 are input slots for hoppers. Use slot 10+ in Manual mode.')}</div>`;
 }
 
 function renderVisualHelp(){
@@ -1222,15 +1405,16 @@ ${steps(isJa?[
 
 function renderRoundtrip(){
   const isJa=lang==='ja';
+  const is124=modVer==='v124';
   return`<div class="page-title">${isJa?'往復自動化':'Round Trip Automation'}</div>
 <p class="page-desc">${isJa?'2つの発射台を使って惑星間を往復輸送する方法です。':'How to automate two-way transport between planets using two launchpads.'}</p>
 <div class="hint">${isJa?'ジェネレータータブの「スクリプトの種類」を「往復」に切り替えると、発射地点・目的地両方のスクリプトを自動生成できます。手動で書く必要はありません。':'Switch "Script Type" to "Round-trip" in the Generator tab to auto-generate scripts for both ends — no manual writing needed.'}</div>
 <h2>${isJa?'地球側スクリプト（例）':'Origin Script Example (Earth)'}</h2>
-<pre>-- Origin: Earth to Moon\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.loadAllItems()\n    lp.launch("ad_astra:moon")\n    print("[LAUNCHED] to Moon")\n    sleep(30)\n    while not lp.isRocketPresent() do sleep(5) end\n  end\nend</pre>
+${is124?`<pre>-- Origin: Earth to Moon\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    -- ${isJa?'積み込みはロケットを右クリックして手動で行う':'Loading is done by hand via the rocket\'s inventory screen'}\n    while lp.getSecondsSinceLanded() &lt; 30 do sleep(5) end\n    lp.launch("ad_astra:moon")\n    print("[LAUNCHED] to Moon")\n  end\nend</pre>`:`<pre>-- Origin: Earth to Moon\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.loadAllItems()\n    lp.launch("ad_astra:moon")\n    print("[LAUNCHED] to Moon")\n    sleep(30)\n    while not lp.isRocketPresent() do sleep(5) end\n  end\nend</pre>`}
 <h2>${isJa?'月側スクリプト（例）':'Destination Script Example (Moon)'}</h2>
-<pre>-- Destination: Moon to Earth\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.unloadAllItems()\n    sleep(5)\n    lp.loadAllItems()\n    lp.launch("minecraft:overworld")\n    print("[LAUNCHED] to Earth")\n    sleep(30)\n    while not lp.isRocketPresent() do sleep(5) end\n  end\nend</pre>
-<div class="warn-box">${isJa?'loadAllItems/unloadAllItems は v1.2.2+ のみ使用可能です。v1.2.1 では moveItemsFromLaunchPadToRocket を使用してください（ジェネレーターのマニュアルモードで自動対応）。':'loadAllItems/unloadAllItems require v1.2.2+. For v1.2.1, moveItemsFromLaunchPadToRocket is used automatically when Manual mode is selected.'}</div>
-<div class="hint">${isJa?'「帰還待機時間」は最低待機時間として使われ、その後 isRocketPresent() で実際の帰還を確認するので "No rocket found" エラーを防げます。':'"Return Wait" is used as a minimum wait, after which isRocketPresent() confirms the actual return — this prevents "No rocket found" errors.'}</div>`;
+${is124?`<pre>-- Destination: Moon to Earth\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    -- ${isJa?'取り出し・積み込みはロケットを右クリックして手動で行う':'Unloading/loading is done by hand via the rocket\'s inventory screen'}\n    while lp.getSecondsSinceLanded() &lt; 30 do sleep(5) end\n    lp.launch("minecraft:overworld")\n    print("[LAUNCHED] to Earth")\n  end\nend</pre>`:`<pre>-- Destination: Moon to Earth\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.unloadAllItems()\n    sleep(5)\n    lp.loadAllItems()\n    lp.launch("minecraft:overworld")\n    print("[LAUNCHED] to Earth")\n    sleep(30)\n    while not lp.isRocketPresent() do sleep(5) end\n  end\nend</pre>`}
+${is124?`<div class="hint">${isJa?'「停止待機時間」は、ロケットが実際に停止してからの経過時間で判定されるため、発射前に確実にロケットのインベントリ画面を使う時間が確保できます。':'"Grounded Wait" is measured from when the rocket actually stops moving, so there\'s reliably time to use its inventory screen before it launches again.'}</div>`:`<div class="warn-box">${isJa?'loadAllItems/unloadAllItems は v1.2.2+ のみ使用可能です。v1.2.1 では moveItemsFromLaunchPadToRocket を使用してください（ジェネレーターのマニュアルモードで自動対応）。':'loadAllItems/unloadAllItems require v1.2.2+. For v1.2.1, moveItemsFromLaunchPadToRocket is used automatically when Manual mode is selected.'}</div>
+<div class="hint">${isJa?'「帰還待機時間」は最低待機時間として使われ、その後 isRocketPresent() で実際の帰還を確認するので "No rocket found" エラーを防げます。':'"Return Wait" is used as a minimum wait, after which isRocketPresent() confirms the actual return — this prevents "No rocket found" errors.'}</div>`}`;
 }
 
 function renderTiers(){
@@ -1251,14 +1435,22 @@ function renderTiers(){
 function renderApi(){
   const isJa=lang==='ja';
   const is111=modVer==='v121';
+  const is124=modVer==='v124';
   const th=isJa?['関数','戻り値','説明']:['Function','Returns','Description'];
   const v112badge=' <span style="color:var(--amber);font-size:10px">[v1.2.2+]</span>';
+  const v124badge=' <span style="color:var(--accent2);font-size:10px">[v1.2.4+]</span>';
   return`<div class="page-title">${isJa?'Lua API 一覧':'Lua API Reference'}</div>
 <p class="page-desc"><code>launch_pad = peripheral.wrap("top")</code></p>
+${is124?`<div class="warn-box">${isJa?'v1.2.4の変更: アイテム・燃料・カーゴ流体の自動転送API（loadAllItems / unloadAllItems / moveItemsFromLaunchPadToRocket / moveItemsFromRocketToLaunchPad / listLaunchPadInventory / listRocketInventory 等）は廃止されました。積み込み・取り出しはロケットを右クリックして開くインベントリ画面から手動で行います。':'v1.2.4 change: the automatic item/fuel/cargo transfer APIs (loadAllItems / unloadAllItems / moveItemsFromLaunchPadToRocket / moveItemsFromRocketToLaunchPad / listLaunchPadInventory / listRocketInventory, etc.) have been removed. Loading and unloading is now done by hand via the rocket\'s own inventory screen (right-click the rocket).'}</div>`:''}
 <h2>${isJa?'発射・状態確認':'Launch & Status'}</h2>
 ${apiTable([
   {fn:'launch(planet)',ret:'—',d:isJa?'指定した惑星へロケットを発射。失敗するとエラー。':'Launch rocket to specified planet. Throws on failure.'},
   {fn:'isRocketPresent()',ret:'boolean',d:isJa?'発射台にロケットがあれば true。':'Returns true if a rocket is on the launchpad.'},
+  ...(is124?[
+  {fn:'isRocketInventoryEmpty()',ret:'boolean',d:(isJa?'ロケットのインベントリが空ならtrue。ロケットがなければエラー。':'Returns true if the rocket\'s inventory is empty. Throws if no rocket is present.')+v124badge},
+  {fn:'getSecondsSinceLanded()',ret:'int',d:(isJa?'ロケットが実際に停止してからの経過秒数。発射からの固定タイマーではない。飛行中は0。':'Seconds since the rocket actually came to a stop (not a fixed timer from launch). Returns 0 while in flight.')+v124badge},
+  {fn:'getTargetPlanet()',ret:'string',d:(isJa?'飛行中の目的地ディメンションID。地上なら "none"。':'Destination dimension ID while in flight, or "none" when grounded.')+v124badge},
+  ]:[]),
   {fn:'getValidDestinations()',ret:'table',d:isJa?'行ける惑星と必要ティアの一覧。':'Returns valid planets and required tiers.'},
 ],th)}
 <h2>${isJa?'エネルギー':'Energy'}</h2>
@@ -1269,6 +1461,7 @@ ${apiTable([
 ],th)}
 <h2>${isJa?`燃料（v1.2.2+）`:`Fuel (v1.2.2+)`}</h2>
 ${is111?`<div class="warn-box">${isJa?'v1.2.1 では燃料APIは使用できません。':'Fuel API is not available in v1.2.1.'}</div>`:''}
+${is124?`<div class="hint">${isJa?'v1.2.4以降、これらはロケット自身のタンクの値を返します（ロケットがなければ発射台が最後に追跡していたロケットの値、それも無ければ0/既定容量）。':'Since v1.2.4 these report values from the rocket\'s own tank (or the last-tracked rocket if none is currently on the pad, or 0/default capacity if neither is available).'}</div>`:''}
 ${apiTable([
   {fn:'getFuel()',ret:'int',d:(isJa?'現在の燃料量（mB）。':'Current fuel amount (mB).')+v112badge},
   {fn:'getMaxFuel()',ret:'int',d:(isJa?'最大燃料容量（mB）。':'Max fuel capacity (mB).')+v112badge},
@@ -1277,46 +1470,53 @@ ${apiTable([
 <h2>${isJa?`カーゴ流体（v1.2.2+）`:`Cargo Fluid (v1.2.2+)`}</h2>
 ${is111?`<div class="warn-box">${isJa?'v1.2.1 ではカーゴ流体APIは使用できません。':'Cargo fluid API is not available in v1.2.1.'}</div>`:''}
 ${apiTable([
-  {fn:'getCargoFluid()',ret:'int',d:(isJa?'カーゴ流体タンクの現在量（mB）。':'Current cargo fluid amount (mB).')+v112badge},
+  {fn:'getCargoFluid()',ret:'int',d:(isJa?(is124?'カーゴ流体タンクの現在量（mB）。ロケット自身のタンクの値。':'カーゴ流体タンクの現在量（mB）。'):(is124?'Current cargo fluid amount (mB), from the rocket\'s own tank.':'Current cargo fluid amount (mB).'))+v112badge},
   {fn:'getMaxCargoFluid()',ret:'int',d:(isJa?'カーゴ流体タンクの最大容量（mB）。':'Max cargo fluid capacity (mB).')+v112badge},
   {fn:'getCargoFluidType()',ret:'string',d:(isJa?'カーゴ流体のID。空なら "empty"。':'Fluid ID of cargo fluid, or "empty".')+v112badge},
 ],th)}
-<h2>${isJa?'インベントリ操作':'Inventory'}</h2>
+${!is124?`<h2>${isJa?'インベントリ操作':'Inventory'}</h2>
 ${apiTable([
-  {fn:'loadAllItems([filter])',ret:'—',d:(isJa?'発射台からロケットへ全アイテムを移動。':'Move all items from launchpad to rocket.')+v112badge},
-  {fn:'unloadAllItems([filter])',ret:'—',d:(isJa?'ロケットから発射台へ全アイテムを移動。':'Move all items from rocket to launchpad.')+v112badge},
+  {fn:'loadAllItems([filter])',ret:'int',d:(isJa?'発射台からロケットへ全アイテムを移動。戻り値は移動できなかった個数（0なら全て成功）。':'Move all items from launchpad to rocket. Returns the count that could not be moved (0 means full success).')+v112badge},
+  {fn:'unloadAllItems([filter])',ret:'int',d:(isJa?'ロケットから発射台へ全アイテムを移動。戻り値は移動できなかった個数。':'Move all items from rocket to launchpad. Returns the count that could not be moved.')+v112badge},
   {fn:'moveItemsFromLaunchPadToRocket(padSlot,rocketSlot)',ret:'—',d:isJa?'発射台スロット → ロケットスロットへ移動。':'Move item from launchpad slot to rocket slot.'},
   {fn:'moveItemsFromRocketToLaunchPad(rocketSlot,padSlot)',ret:'—',d:isJa?'ロケットスロット → 発射台スロットへ移動。':'Move item from rocket slot to launchpad slot.'},
   {fn:'listRocketInventory()',ret:'table|nil',d:isJa?'ロケット内のアイテム一覧。ロケットがなければ nil。':'List rocket inventory, or nil if no rocket.'},
   {fn:'listLaunchPadInventory()',ret:'table',d:isJa?'発射台インベントリのアイテム一覧。':'List launchpad inventory.'},
   {fn:'listLaunchPadInputSlotIndexes()',ret:'int[]',d:isJa?'ホッパー等が挿入できるスロット番号一覧。':'Slot indexes hoppers can insert into.'},
   {fn:'listLaunchPadOutputSlotIndexes()',ret:'int[]',d:isJa?'ホッパー等が取り出せるスロット番号一覧。':'Slot indexes hoppers can extract from.'},
-],th)}
+],th)}`:''}
 <h2>${isJa?`Rocket Scanner連携（v1.2.3+）`:`Rocket Scanner (v1.2.3+)`}</h2>
-${modVer!=='v123'?`<div class="warn-box">${isJa?'Rocket Scanner APIは v1.2.3 以降でのみ使用できます。':'Rocket Scanner API is only available in v1.2.3+.'}</div>`:''}
+${(modVer!=='v123'&&!is124)?`<div class="warn-box">${isJa?'Rocket Scanner APIは v1.2.3 以降でのみ使用できます。':'Rocket Scanner API is only available in v1.2.3+.'}</div>`:''}
 ${apiTable([
-  {fn:'setRocketStatus(status)',ret:'—',d:isJa?'発射台にあるロケットに表示用の状態文字列を設定。Rocket ScannerアイテムのGUIで自動推測より優先して表示される。ロケットがなければエラー。':'Sets a display status string on the rocket on this pad. Shown in the Rocket Scanner GUI in place of the automatic guess. Throws if no rocket is present.'},
-  {fn:'setRocketName(name)',ret:'—',d:isJa?'発射台にあるロケットに名前を設定（最大32文字）。Rocket Scanner GUIのロケット一覧に表示される。ロケットがなければエラー。':'Sets a display name on the rocket on this pad (max 32 chars). Shown in the Rocket Scanner GUI rocket list. Throws if no rocket is present.'},
+  {fn:'setRocketStatus(status)',ret:'—',d:isJa?'発射台にあるロケット（飛行中で発射台上に無くても、直前にそこから発射されたロケットを追跡）に表示用の状態文字列を設定。Rocket ScannerアイテムのGUIで自動推測より優先して表示される。ロケットがなければエラー。':'Sets a display status string on the rocket associated with this pad (tracked even mid-flight if it was the last one launched from here). Shown in the Rocket Scanner GUI in place of the automatic guess. Throws if no rocket is found.'},
+  {fn:'setRocketName(name)',ret:'—',d:isJa?'発射台にあるロケットに名前を設定（最大32文字）。Rocket Scanner GUIのロケット一覧に表示される。ロケットがなければエラー。':'Sets a display name on the rocket associated with this pad (max 32 chars). Shown in the Rocket Scanner GUI rocket list. Throws if no rocket is found.'},
 ],th)}`;
 }
 
 function renderExamples(){
   const isJa=lang==='ja';
   const is111=modVer==='v121';
+  const is124=modVer==='v124';
   return`<div class="page-title">${isJa?'スクリプト例':'Script Examples'}</div>
 <p class="page-desc">${isJa?'よく使うパターンのLuaスクリプト例です。':'Common Lua script patterns for reference.'}</p>
 <h2>${isJa?'① 現在の状態を全部確認':'① Check All Status'}</h2>
 <pre>local lp = peripheral.wrap("top")\nprint("Energy: " .. lp.getEnergy() .. " / " .. lp.getMaxEnergy())\nprint("Rocket: " .. tostring(lp.isRocketPresent()))\nfor planet, tier in pairs(lp.getValidDestinations()) do\n  print("  " .. planet .. " = Tier " .. tier)\nend</pre>
 ${!is111?`<h2>${isJa?'② 燃料・エネルギー両方待機（v1.2.2+）':'② Wait for Both Energy and Fuel (v1.2.2+)'}</h2>
 <pre>local lp = peripheral.wrap("top")\nwhile lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\nwhile lp.getFuel() &lt; 3000 do\n  print("Fueling... " .. lp.getFuel() .. " mB")\n  sleep(5)\nend\nprint("Ready!")</pre>`:''}
-<h2>${isJa?`${is111?'②':'③'} v1.2.1 マニュアルスロット転送`:`${is111?'②':'③'} v1.2.1 Manual Slot Transfer`}</h2>
+${is124?`<h2>${isJa?`${is111?'②':'③'} 停止してから一定時間待って発射`:`${is111?'②':'③'} Wait After Grounding, Then Launch`}</h2>
+<pre>local lp = peripheral.wrap("top")\n-- ${isJa?'積み込みはロケットを右クリックして手動で行う':'Loading is done by hand via the rocket\'s inventory screen'}\nwhile lp.getSecondsSinceLanded() &lt; 30 do\n  print("Grounded: " .. lp.getSecondsSinceLanded() .. "/30 sec")\n  sleep(5)\nend\nlp.launch("ad_astra:moon")</pre>
+<h2>${isJa?'④ 空になるまで発射しない（安全装置）':'④ Don\'t Relaunch Until Empty (Safety Check)'}</h2>
+<pre>local lp = peripheral.wrap("top")\nwhile not lp.isRocketInventoryEmpty() do\n  print("Still has cargo, waiting to be unloaded by hand...")\n  sleep(5)\nend\nlp.launch("minecraft:overworld")</pre>
+<h2>${isJa?'⑤ 飛行中の目的地を確認':'⑤ Check In-Flight Destination'}</h2>
+<pre>local lp = peripheral.wrap("top")\nlocal target = lp.getTargetPlanet()\nif target == "none" then\n  print("Rocket is grounded")\nelse\n  print("Rocket is flying to " .. target)\nend</pre>`:`<h2>${isJa?`${is111?'②':'③'} v1.2.1 マニュアルスロット転送`:`${is111?'②':'③'} v1.2.1 Manual Slot Transfer`}</h2>
 <pre>local lp = peripheral.wrap("top")\n-- ${isJa?'スロット10番からロケットの1番へ':'Move from pad slot 10 to rocket slot 1'}\nlp.moveItemsFromLaunchPadToRocket(10, 1)\nlp.launch("ad_astra:moon")\nsleep(30)\nlp.moveItemsFromRocketToLaunchPad(1, 10)</pre>
 <h2>${isJa?'④ インベントリの中身を確認':'④ Inspect Inventory'}</h2>
-<pre>local lp = peripheral.wrap("top")\nlocal inv = lp.listRocketInventory()\nif inv then\n  for slot, item in pairs(inv) do\n    print("Slot " .. slot .. ": " .. item.name .. " x" .. item.count)\n  end\nelse\n  print("No rocket found")\nend</pre>`;
+<pre>local lp = peripheral.wrap("top")\nlocal inv = lp.listRocketInventory()\nif inv then\n  for slot, item in pairs(inv) do\n    print("Slot " .. slot .. ": " .. item.name .. " x" .. item.count)\n  end\nelse\n  print("No rocket found")\nend</pre>`}`;
 }
 
 function renderTrouble(){
   const isJa=lang==='ja';
+  const is124=modVer==='v124';
   return`<div class="page-title">${isJa?'トラブルシューティング':'Troubleshooting'}</div>
 <p class="page-desc">${isJa?'よくあるエラーと解決方法をまとめました。':'Common errors and how to fix them.'}</p>
 <h2>${isJa?'接続エラー':'Connection Errors'}</h2>
@@ -1329,12 +1529,17 @@ ${errCards([
 ${errCards([
   {cls:'',t:'No rocket found',b:isJa?'<strong>原因：</strong> 発射台にロケットがない。<br><strong>解決：</strong> ロケットを発射台の中央ブロックに設置する。':'<strong>Cause:</strong> No rocket on launchpad.<br><strong>Fix:</strong> Place rocket on the central block.'},
   {cls:'',t:'Not enough energy to launch',b:isJa?'<strong>原因：</strong> エネルギー不足（通常 500,000 FE 必要）。<br><strong>解決：</strong> 発電機で供給。<code>launch_pad.getEnergy()</code> で確認。':'<strong>Cause:</strong> Insufficient energy (500,000 FE needed).<br><strong>Fix:</strong> Supply energy. Check with <code>launch_pad.getEnergy()</code>.'},
-  {cls:'',t:'Not enough fuel to launch',b:isJa?'<strong>原因：</strong> 燃料不足（3000 mB 必要）。<br><strong>解決：</strong> 発射台の底面にパイプで供給、またはバケツで右クリック。':'<strong>Cause:</strong> Fuel tank empty (3000 mB needed).<br><strong>Fix:</strong> Connect fuel pipe to BOTTOM face, or right-click with fuel bucket.'},
+  {cls:'',t:'Not enough fuel to launch',b:is124?(isJa?'<strong>原因：</strong> 燃料不足（3000 mB 必要）。<br><strong>解決：</strong> ロケットを右クリックして開くインベントリ画面で、燃料バケツをスロットに入れて補充する。':'<strong>Cause:</strong> Fuel tank empty (3000 mB needed).<br><strong>Fix:</strong> Right-click the rocket to open its inventory screen and place a fuel bucket in the slot to refill it.'):(isJa?'<strong>原因：</strong> 燃料不足（3000 mB 必要）。<br><strong>解決：</strong> 発射台の底面にパイプで供給、またはバケツで右クリック。':'<strong>Cause:</strong> Fuel tank empty (3000 mB needed).<br><strong>Fix:</strong> Connect fuel pipe to BOTTOM face, or right-click with fuel bucket.')},
   {cls:'',t:'<planet> is too high of a tier for this rocket',b:isJa?'<strong>原因：</strong> ロケットのティアが目的地に対して不足。<br><strong>解決：</strong> 高ティアのロケットを使用する。':'<strong>Cause:</strong> Rocket tier too low for destination.<br><strong>Fix:</strong> Use a higher tier rocket.'},
   {cls:'warn',t:'<planet> is not a valid planet',b:isJa?'<strong>原因：</strong> 惑星IDのタイポ。<br><strong>解決：</strong> <code>launch_pad.getValidDestinations()</code> で正しいIDを確認。':'<strong>Cause:</strong> Typo in planet ID.<br><strong>Fix:</strong> Check correct IDs with <code>launch_pad.getValidDestinations()</code>.'},
 ])}
 <h2>${isJa?'よくある質問':'FAQ'}</h2>
-${errCards([
+${errCards(is124?[
+  {cls:'ok',t:isJa?'アイテムやカーゴ流体を発射台から積めない':'Cannot load items or cargo fluid from the launchpad',b:isJa?'v1.2.4以降、ランチパッド経由の自動転送は廃止されました。ロケットが地上で停止している間に右クリックして、専用のインベントリ画面から直接アイテムやバケツを出し入れしてください。':'As of v1.2.4, automatic transfer via the launchpad has been removed. While the rocket is grounded, right-click it to open its own inventory screen and place items or buckets directly.'},
+  {cls:'ok',t:isJa?'スクリプトを止めたい':'How to stop the script',b:isJa?'PCを開いた状態で Ctrl+T を押すと強制終了。':'Press Ctrl+T while the PC is open.'},
+  {cls:'ok',t:isJa?'前回の荷物を降ろし忘れたまま再発射してしまう':'The rocket relaunches before last trip\'s cargo is unloaded',b:isJa?'ジェネレーターの「発射前チェック」で「ロケットのインベントリが空になるまで発射しない」を有効にすると、手動で降ろし切るまで発射を待機します。':'Enable "Don\'t launch until the rocket\'s inventory is empty" under "Pre-Launch Check" in the generator — it holds the launch until you\'ve unloaded it by hand.'},
+  {cls:'ok',t:isJa?'再起動したらスクリプトが動かない':'Script does not run after reboot',b:isJa?'ファイル名を startup.lua にすることでPC起動時に自動実行されます。':'Name the file startup.lua for auto-run on boot.'},
+]:[
   {cls:'ok',t:isJa?'スロット1〜9にアイテムを入れたのにロケットに積まれない':'Items in slots 1–9 do not load into rocket',b:isJa?'スロット1〜9はホッパー用インプットスロット。マニュアルモードでは10番以降を使ってください。':'Slots 1–9 are hopper input slots. Use slot 10+ in Manual mode.'},
   {cls:'ok',t:isJa?'スクリプトを止めたい':'How to stop the script',b:isJa?'PCを開いた状態で Ctrl+T を押すと強制終了。':'Press Ctrl+T while the PC is open.'},
   {cls:'ok',t:isJa?'v1.2.1 で loadAllItems が使えない':'loadAllItems not available in v1.2.1',b:isJa?'loadAllItems は v1.2.2+ の機能です。v1.2.1 では moveItemsFromLaunchPadToRocket でスロットを個別に指定してください。':'loadAllItems is a v1.2.2+ feature. Use moveItemsFromLaunchPadToRocket with individual slot numbers for v1.2.1.'},
