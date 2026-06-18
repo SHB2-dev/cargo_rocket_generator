@@ -294,7 +294,7 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
           <input type="number" id="minFuel" value="3000" min="0">
         </div>
         <div class="field v112-only">
-          <label data-i18n="lbl_cargocheck">Cargo Fluid Check <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_cargocheck">Checks the cargo fluid currently aboard the rocket itself (filled/drained by hand via the rocket's inventory screen).</div></span></label>
+          <label data-i18n="lbl_cargocheck">Cargo Fluid Check <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_cargocheck">Checks the cargo fluid currently aboard the rocket itself, however it got there (pipe or by hand).</div></span></label>
           <select id="cargoCheck">
             <option value="log" data-i18n="cargo_log">Log type and amount</option>
             <option value="wait_empty" data-i18n="cargo_wait_empty">Wait until empty</option>
@@ -307,7 +307,7 @@ code{font-family:var(--mono);font-size:11px;background:var(--surface2);border:1p
         </div>
       </div>
       <div class="section v124-only">
-        <div class="section-label" data-i18n="sec_loadwait">Pre-Launch Check <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_loadwait_v124">Items and cargo fluid are now loaded/unloaded by hand from the rocket's own inventory screen (right-click the rocket while it's grounded). This script no longer transfers anything automatically — it only waits for energy/fuel and triggers the launch.</div></span></div>
+        <div class="section-label" data-i18n="sec_loadwait">Pre-Launch Check <span class="tip-wrap"><button class="tip-btn" type="button">?</button><div class="tip-box" data-i18n="tip_loadwait_v124">Items and cargo fluid live in the rocket's own inventory/tanks. Pipes and hoppers connected to the launchpad still load/unload them automatically while the rocket is grounded, or you can do it by hand via the rocket's inventory screen (right-click it). This script just waits for energy/fuel and triggers the launch.</div></span></div>
         <div class="field">
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
             <input type="checkbox" id="requireEmptyBeforeLaunch" style="width:auto;"> <span data-i18n="lbl_requireempty">Don't launch until the rocket's inventory is empty</span>
@@ -561,10 +561,10 @@ en:{
   lbl_fuelcheck:"Fuel Check",tip_fuelcheck:"Check fuel before launch. Supply via pipe to BOTTOM face of launchpad.",
   fuel_warn:"Warn if low",fuel_wait:"Wait until full",fuel_none:"Disabled",
   lbl_minfuel:"Min Fuel (mB)",tip_minfuel:"Min fuel needed before launch. Default 3000 mB = 3 buckets.",
-  lbl_cargocheck:"Cargo Fluid Check",tip_cargocheck:"Checks the cargo fluid currently aboard the rocket itself (filled/drained by hand via the rocket's inventory screen).",
+  lbl_cargocheck:"Cargo Fluid Check",tip_cargocheck:"Checks the cargo fluid currently aboard the rocket itself, however it got there (pipe or by hand).",
   cargo_log:"Log type and amount",cargo_wait_fill:"Wait until full",cargo_wait_empty:"Wait until empty",cargo_none:"Disabled",
   lbl_cargothreshold:"Cargo Threshold (mB)",tip_cargothreshold:"Target mB to wait for. 0 = empty, blank = full tank.",
-  sec_loadwait:"Pre-Launch Check",tip_loadwait_v124:"Items and cargo fluid are now loaded/unloaded by hand from the rocket's own inventory screen (right-click the rocket while it's grounded). This script no longer transfers anything automatically — it only waits for energy/fuel and triggers the launch.",
+  sec_loadwait:"Pre-Launch Check",tip_loadwait_v124:"Items and cargo fluid live in the rocket's own inventory/tanks. Pipes and hoppers connected to the launchpad still load/unload them automatically while the rocket is grounded, or you can do it by hand via the rocket's inventory screen (right-click it). This script just waits for energy/fuel and triggers the launch.",
   lbl_requireempty:"Don't launch until the rocket's inventory is empty",tip_requireempty:"Safety check: if leftover cargo wasn't unloaded by hand last cycle, hold the rocket on the pad instead of launching it again with old items still aboard.",
   lbl_rtdir:"Per-Direction Cargo",tip_rtdir:"Choose whether items and cargo fluid are loaded at each end. Useful when cargo should only flow one way.",
   rtdir_origin_hdr:"Origin →",rtdir_dest_hdr:"Destination →",rtdir_loaditems:"Load items",rtdir_loadcargo:"Load cargo fluid",
@@ -617,10 +617,10 @@ ja:{
   lbl_fuelcheck:"燃料チェック",tip_fuelcheck:"発射前に燃料を確認。発射台の底面（Bottom）にパイプで供給してください。",
   fuel_warn:"不足時に警告",fuel_wait:"満タンまで待機",fuel_none:"無効",
   lbl_minfuel:"最低必要燃料（mB）",tip_minfuel:"発射前に必要な最低燃料量。デフォルト 3000 mB = バケツ3個。",
-  lbl_cargocheck:"カーゴ流体チェック",tip_cargocheck:"ロケット自身が現在運んでいるカーゴ流体を確認します（ロケットのインベントリ画面から手動で注入・排出）。",
+  lbl_cargocheck:"カーゴ流体チェック",tip_cargocheck:"ロケット自身が現在運んでいるカーゴ流体を確認します（パイプ経由・手動どちらで入れたものでも対象）。",
   cargo_log:"種類と量をログ出力",cargo_wait_fill:"満タンまで待機",cargo_wait_empty:"空になるまで待機",cargo_none:"無効",
   lbl_cargothreshold:"カーゴしきい値（mB）",tip_cargothreshold:"待機する目標量（mB）。0=空まで、空欄=満タンまで。",
-  sec_loadwait:"発射前チェック",tip_loadwait_v124:"アイテム・カーゴ流体は、ロケット自身のインベントリ画面（ロケットが停止中に右クリックで開く）から手動で積み込み・取り出しを行うようになりました。このスクリプトはもう自動転送を行わず、エネルギー・燃料の待機と発射のトリガーのみを行います。",
+  sec_loadwait:"発射前チェック",tip_loadwait_v124:"アイテム・カーゴ流体はロケット自身のインベントリ/タンクにあります。発射台に繋いだパイプ・ホッパーは、ロケットが着地している間そのまま自動的に積み込み・取り出しでき、ロケットを右クリックして開くインベントリ画面から手動で行うこともできます。このスクリプトはエネルギー・燃料の待機と発射のトリガーのみを行います。",
   lbl_requireempty:"ロケットのインベントリが空になるまで発射しない",tip_requireempty:"安全装置: 前回の積み荷が手動で降ろされていない場合、古い荷物を積んだまま再発射せずに発射台で待機します。",
   lbl_rtdir:"方向ごとの積み込み設定",tip_rtdir:"発射地点・目的地それぞれでアイテムとカーゴ流体を積むかどうかを選べます。片方向だけ輸送したい場合に便利です。",
   rtdir_origin_hdr:"発射地点 →",rtdir_dest_hdr:"目的地 →",rtdir_loaditems:"アイテムを積む",rtdir_loadcargo:"カーゴ流体を積む",
@@ -764,10 +764,12 @@ function buildCodeV124(cfg){
 -- Cargo Rocket Automation Script (${roleLabel})
 -- Ad Astra + CC:Tweaked
 --
--- v1.2.4: items and cargo fluid are loaded/unloaded by hand from the
--- rocket's own inventory screen (right-click the rocket while grounded).
--- This script only watches energy/fuel and triggers the launch -- it does
--- not move any items or fluid itself.
+-- v1.2.4: items, fuel, and cargo fluid live in the rocket's own inventory/
+-- tanks. Pipes/hoppers connected to the launchpad still load and unload
+-- them automatically while the rocket is grounded, or you can use its
+-- inventory screen by hand (right-click the rocket). This script only
+-- watches energy/fuel and triggers the launch -- it does not move any
+-- items or fluid itself.
 -- ============================================
 
 local PERIPHERAL      = "${pad}"
@@ -1293,16 +1295,20 @@ function renderFuel(){
   const is124=modVer==='v124';
   return`<div class="page-title">${isJa?'燃料の設定':'Fuel Setup'}</div>
 <p class="page-desc">${isJa?(is124?'ロケットにはFEエネルギーとは別に液体燃料が必要です。v1.2.4以降、燃料タンクはロケット自身が持っています。':'ロケットにはFEエネルギーとは別に液体燃料が必要です。'):(is124?'Rockets require liquid fuel separate from FE energy. Since v1.2.4, the fuel tank lives on the rocket itself.':'Rockets require liquid fuel separate from FE energy.')}</p>
-${is124?`<div class="warn-box">${isJa?'v1.2.4の変更: 燃料は発射台ではなくロケット自身のタンクに保存されます。発射台にパイプで燃料を送る仕様は廃止されました。':'v1.2.4 change: fuel is now stored in the rocket\'s own tank, not the launchpad. Piping fuel into the launchpad is no longer supported.'}</div>
+${is124?`<div class="hint">${isJa?'v1.2.4の変更: 燃料タンクはロケット自身が持つようになりましたが、発射台のパイプ接続はそのまま使えます。ロケットが発射台に着地している間、発射台の底面は燃料パイプの注ぎ先としてそのロケットのタンクへ直結します。':'v1.2.4 change: the fuel tank now lives on the rocket itself, but the launchpad\'s pipe connections still work the same way. While a rocket is grounded on the pad, the launchpad\'s bottom face acts as a direct pipe destination into that rocket\'s own tank.'}</div>
+<h2>${isJa?'発射台の接続面':'Launchpad Fluid Connections'}</h2>
+<table class="fluid-table"><thead><tr><th>${isJa?'面':'Face'}</th><th>${isJa?'機能':'Function'}</th></tr></thead><tbody>
+<tr><td>⬇️ <strong>Bottom</strong></td><td>${isJa?'着地中のロケットの燃料タンクへ直結 — 燃料パイプをここに接続':'Direct connection to the grounded rocket\'s fuel tank — connect fuel pipes here'}</td></tr>
+<tr><td>⬆️ Top / Sides</td><td>${isJa?'着地中のロケットのカーゴ流体タンクへ直結（入力・出力）':'Direct connection to the grounded rocket\'s cargo fluid tank (input &amp; output)'}</td></tr>
+<tr><td>${isJa?'どの面でも':'Any side'}</td><td>Forge Energy (FE) ${isJa?'入力':'input'}</td></tr>
+</tbody></table>
 <h2>${isJa?'燃料の供給方法':'Supplying Fuel'}</h2>
 ${steps(isJa?[
-  {t:'ロケットを右クリック',d:'ロケットが地上で停止している間に右クリックすると、インベントリ画面が開きます。'},
-  {t:'燃料バケツをスロットに入れる',d:'燃料バケツ（または対応する流体のバケツ）をGUI内の専用スロットに置くと、自動的にタンクへ注がれ空バケツに変わります。'},
-  {t:'タンクから汲み出す',d:'同じスロットに空バケツを置くと、タンクから1000 mB汲み出して満タンのバケツに変わります。'},
+  {t:'パイプで供給（推奨）',d:'発射台の底面に流体パイプを接続。ロケットが着地している間、そのまま燃料タンクへ供給されます。'},
+  {t:'手動（バケツ）',d:'発射台の底面、またはロケットを右クリックして開くインベントリ画面のバケツスロットに燃料バケツを入れて補充。発射に3000 mB（バケツ3個）必要。'},
 ]:[
-  {t:'Right-click the rocket',d:'While the rocket is grounded, right-click it to open its inventory screen.'},
-  {t:'Place a fuel bucket in the slot',d:'Drop a bucket of fuel (or any compatible fluid) into the dedicated slot in the GUI — it empties into the tank and the bucket becomes empty.'},
-  {t:'Draw fuel back out',d:'Place an empty bucket in the same slot to draw 1000 mB out of the tank, turning it into a full bucket.'},
+  {t:'Pipe (recommended)',d:'Connect a fluid pipe to the bottom face. As long as a rocket is grounded there, fuel flows straight into its tank.'},
+  {t:'Manual (bucket)',d:'Right-click the bottom face, or use the bucket slot in the rocket\'s inventory screen (right-click the rocket). 3000 mB (3 buckets) needed for launch.'},
 ])}`:`<h2>${isJa?'発射台の接続面':'Launchpad Fluid Connections'}</h2>
 <table class="fluid-table"><thead><tr><th>${isJa?'面':'Face'}</th><th>${isJa?'機能':'Function'}</th></tr></thead><tbody>
 <tr><td>⬇️ <strong>Bottom</strong></td><td>${isJa?'燃料タンク入力専用 — 燃料パイプをここに接続':'Fuel tank input only — connect fuel pipes here'}</td></tr>
@@ -1321,7 +1327,7 @@ ${steps(isJa?[
 <p>${isJa?'通常燃料:':'Standard:'} <code>ad_astra:fuel</code><br>${isJa?'クライオ燃料:':'Cryo fuel:'} <code>ad_astra:cryo_fuel</code> ${isJa?'（高ティアロケット用）':'(for higher tier rockets)'}</p>
 <h2>${isJa?'Luaで燃料を確認（v1.2.2+）':'Check Fuel via Lua (v1.2.2+)'}</h2>
 <pre>launch_pad = peripheral.wrap("top")\nprint(launch_pad.getFuel() .. " / " .. launch_pad.getMaxFuel())\nprint(launch_pad.getFuelType())</pre>
-<div class="hint">${is124?(isJa?'これらのAPIはロケット自身のタンクの値を返します（v1.2.1では燃料APIは使えません）。':'These APIs return values from the rocket\'s own tank (not available at all in v1.2.1).'):(isJa?'v1.2.1では燃料APIは使えません。燃料は手動またはパイプで補充してください。':'Fuel API is not available in v1.2.1. Supply fuel manually or via pipe.')}</div>`;
+<div class="hint">${is124?(isJa?'これらのAPIはロケット自身のタンクの値を返します。発射台のパイプから供給した分も即座に反映されます（v1.2.1では燃料APIは使えません）。':'These APIs return values from the rocket\'s own tank, including anything just fed in via the launchpad\'s pipes (not available at all in v1.2.1).'):(isJa?'v1.2.1では燃料APIは使えません。燃料は手動またはパイプで補充してください。':'Fuel API is not available in v1.2.1. Supply fuel manually or via pipe.')}</div>`;
 }
 
 function renderFluid(){
@@ -1331,20 +1337,17 @@ function renderFluid(){
 <p class="page-desc">${isJa?(is124?'ロケットで液体を惑星間輸送する方法です（v1.2.2+）。v1.2.4以降、カーゴ流体タンクもロケット自身が持っています。':'ロケットで液体を惑星間輸送する方法です（v1.2.2+）。'):(is124?'How to transport liquids between planets using rockets (v1.2.2+). Since v1.2.4, the cargo fluid tank also lives on the rocket itself.':'How to transport liquids between planets using rockets (v1.2.2+).')}</p>
 <div class="warn-box">${isJa?'この機能はv1.2.2以上が必要です。v1.2.1では液体APIが使えません。':'This feature requires v1.2.2+. Fluid API is not available in v1.2.1.'}</div>
 <h2>${isJa?'仕組み':'How It Works'}</h2>
-${is124?`<p>${isJa?'ロケットを右クリックすると開くインベントリ画面に、カーゴ流体専用のバケツスロットがあります。発射台のパイプによる自動搬入・搬出は廃止されました。':'The rocket\'s inventory screen (opened by right-clicking it) has a dedicated bucket slot for cargo fluid. Automatic pipe-based loading/unloading on the launchpad has been removed.'}</p>
-<div class="warn-box">${isJa?'液体の積み込み・取り出しは、ロケットのGUIでバケツを使って手動で行います。CCのAPIはあくまで残量の確認・待機のみです。':'Loading and draining liquid is done by hand with buckets in the rocket\'s GUI. The CC API only monitors levels and waits.'}</div>
+${is124?`<p>${isJa?'カーゴ流体タンクはロケット自身が持ちますが、発射台の上面・側面のパイプ接続はそのまま使えます。ロケットが発射台に着地している間、発射台はそのロケットのタンクへの直接の窓口になり、パイプで自動的に注入・排出できます。ロケットを右クリックして開くインベントリ画面のバケツスロットからも手動で操作できます。':'The cargo fluid tank lives on the rocket itself, but the top/side pipe connections on the launchpad still work the same way. While a rocket is grounded on the pad, the launchpad acts as a direct window into that rocket\'s tank, so pipes can fill or drain it automatically. You can also fill/drain it manually via the bucket slot in the rocket\'s inventory screen (right-click the rocket).'}</p>
 ${steps(isJa?[
-  {t:'ロケットを右クリック（地上停止中）',d:'インベントリ画面が開きます。'},
-  {t:'カーゴ流体バケツをスロットに入れる',d:'満タンのバケツを置くとタンクに注がれ空バケツに変わります。'},
-  {t:'「カーゴ流体チェック」を設定',d:'ジェネレーターで必要に応じてログ出力や空チェックを設定できます。'},
+  {t:'積み込み地点にパイプを設置',d:'発射台の上面・側面に流体パイプを繋ぐ。ロケットが着地している間、そのタンクへ直接注入されます。'},
+  {t:'「カーゴ流体チェック」を設定',d:'ジェネレーターで「満タンまで待機」に設定すると、液体が溜まるまで待機します。'},
   {t:'発射',d:'液体を積んだロケットが目的地へ発射されます。'},
-  {t:'目的地でロケットを右クリックして取り出す',d:'帰還後、目的地側でロケットのGUIから空バケツを使って液体を取り出します。'},
+  {t:'目的地側のパイプ、またはロケットを右クリックして排出',d:'帰還後、目的地側の発射台のパイプで自動的に抜き取るか、ロケットのGUIから空バケツで取り出します。'},
 ]:[
-  {t:'Right-click the rocket while grounded',d:'Opens its inventory screen.'},
-  {t:'Place a cargo fluid bucket in the slot',d:'A full bucket empties into the tank and becomes an empty bucket.'},
-  {t:'Set up "Cargo Fluid Check" if needed',d:'The generator can log the cargo level or wait until it\'s emptied.'},
+  {t:'Place pipes at origin',d:'Connect fluid pipes to the top/side faces — while a rocket is grounded there, they fill its tank directly.'},
+  {t:'Set "Cargo Fluid Check" to wait until full',d:'The script waits until the tank is full before proceeding.'},
   {t:'Launch',d:'Rocket launches with liquid cargo to the destination.'},
-  {t:'Right-click at the destination to drain',d:'After arrival, use an empty bucket in the rocket\'s GUI at the destination to extract the fluid.'},
+  {t:'Drain via pipe or by right-clicking the rocket',d:'After arrival, pipes on the destination launchpad extract it automatically, or use an empty bucket in the rocket\'s own GUI.'},
 ])}`:`<p>${isJa?'発射台の上面・側面はカーゴ流体タンクに接続されています。ここに流体パイプを繋ぐことで液体を自動的に積み込み・降ろしできます。':'The top and side faces of the launchpad connect to the cargo fluid tank. Attach fluid pipes here to automatically load and unload liquids.'}</p>
 <div class="warn-box">${isJa?'液体の移動自体はパイプで行います。CCのAPIはあくまで残量の確認・待機のみです。':'Fluid movement is handled by pipes. The CC API only monitors levels and waits.'}</div>
 ${steps(isJa?[
@@ -1381,7 +1384,7 @@ ${steps(isJa?[
   {t:'Auto-start (startup.lua)',d:'Name the file startup.lua to run automatically on PC boot. Use reboot to restart.'},
   {t:'Stop',d:'Press Ctrl+T while the PC is open to terminate the program.'},
 ])}
-<div class="hint">${is124?(isJa?'アイテムやカーゴ流体の積み込み・取り出しは、ロケットを右クリックして開くインベントリ画面から手動で行います。このスクリプトはエネルギー・燃料の待機と発射のみを行います。':'Loading and unloading items or cargo fluid is done by hand via the rocket\'s own inventory screen (right-click the rocket). This script only waits for energy/fuel and triggers the launch.'):(isJa?'スロット1〜9はホッパー用インプットスロットです。マニュアルモードでは10番以降を使ってください。':'Slots 1–9 are input slots for hoppers. Use slot 10+ in Manual mode.')}</div>`;
+<div class="hint">${is124?(isJa?'アイテムやカーゴ流体の積み込み・取り出しは、発射台に繋いだパイプ/ホッパーで自動化するか、ロケットを右クリックして開くインベントリ画面から手動で行います。このスクリプトはエネルギー・燃料の待機と発射のみを行います（自動転送のスクリプトAPIは廃止）。':'Loading and unloading items or cargo fluid can be automated via pipes/hoppers connected to the launchpad, or done by hand via the rocket\'s own inventory screen (right-click the rocket). This script only waits for energy/fuel and triggers the launch (the scripted transfer APIs have been removed).'):(isJa?'スロット1〜9はホッパー用インプットスロットです。マニュアルモードでは10番以降を使ってください。':'Slots 1–9 are input slots for hoppers. Use slot 10+ in Manual mode.')}</div>`;
 }
 
 function renderVisualHelp(){
@@ -1410,9 +1413,9 @@ function renderRoundtrip(){
 <p class="page-desc">${isJa?'2つの発射台を使って惑星間を往復輸送する方法です。':'How to automate two-way transport between planets using two launchpads.'}</p>
 <div class="hint">${isJa?'ジェネレータータブの「スクリプトの種類」を「往復」に切り替えると、発射地点・目的地両方のスクリプトを自動生成できます。手動で書く必要はありません。':'Switch "Script Type" to "Round-trip" in the Generator tab to auto-generate scripts for both ends — no manual writing needed.'}</div>
 <h2>${isJa?'地球側スクリプト（例）':'Origin Script Example (Earth)'}</h2>
-${is124?`<pre>-- Origin: Earth to Moon\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    -- ${isJa?'積み込みはロケットを右クリックして手動で行う':'Loading is done by hand via the rocket\'s inventory screen'}\n    while lp.getSecondsSinceLanded() &lt; 30 do sleep(5) end\n    lp.launch("ad_astra:moon")\n    print("[LAUNCHED] to Moon")\n  end\nend</pre>`:`<pre>-- Origin: Earth to Moon\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.loadAllItems()\n    lp.launch("ad_astra:moon")\n    print("[LAUNCHED] to Moon")\n    sleep(30)\n    while not lp.isRocketPresent() do sleep(5) end\n  end\nend</pre>`}
+${is124?`<pre>-- Origin: Earth to Moon\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    -- ${isJa?'積み込みはパイプ/ホッパーで自動化、または手動で行う':'Loading can be automated via pipe/hopper, or done by hand'}\n    while lp.getSecondsSinceLanded() &lt; 30 do sleep(5) end\n    lp.launch("ad_astra:moon")\n    print("[LAUNCHED] to Moon")\n  end\nend</pre>`:`<pre>-- Origin: Earth to Moon\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.loadAllItems()\n    lp.launch("ad_astra:moon")\n    print("[LAUNCHED] to Moon")\n    sleep(30)\n    while not lp.isRocketPresent() do sleep(5) end\n  end\nend</pre>`}
 <h2>${isJa?'月側スクリプト（例）':'Destination Script Example (Moon)'}</h2>
-${is124?`<pre>-- Destination: Moon to Earth\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    -- ${isJa?'取り出し・積み込みはロケットを右クリックして手動で行う':'Unloading/loading is done by hand via the rocket\'s inventory screen'}\n    while lp.getSecondsSinceLanded() &lt; 30 do sleep(5) end\n    lp.launch("minecraft:overworld")\n    print("[LAUNCHED] to Earth")\n  end\nend</pre>`:`<pre>-- Destination: Moon to Earth\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.unloadAllItems()\n    sleep(5)\n    lp.loadAllItems()\n    lp.launch("minecraft:overworld")\n    print("[LAUNCHED] to Earth")\n    sleep(30)\n    while not lp.isRocketPresent() do sleep(5) end\n  end\nend</pre>`}
+${is124?`<pre>-- Destination: Moon to Earth\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    -- ${isJa?'取り出し・積み込みはパイプ/ホッパーで自動化、または手動で行う':'Unloading/loading can be automated via pipe/hopper, or done by hand'}\n    while lp.getSecondsSinceLanded() &lt; 30 do sleep(5) end\n    lp.launch("minecraft:overworld")\n    print("[LAUNCHED] to Earth")\n  end\nend</pre>`:`<pre>-- Destination: Moon to Earth\nlocal lp = peripheral.wrap("top")\nif not lp then error("No launchpad") end\nwhile true do\n  while lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\n  if lp.isRocketPresent() then\n    lp.unloadAllItems()\n    sleep(5)\n    lp.loadAllItems()\n    lp.launch("minecraft:overworld")\n    print("[LAUNCHED] to Earth")\n    sleep(30)\n    while not lp.isRocketPresent() do sleep(5) end\n  end\nend</pre>`}
 ${is124?`<div class="hint">${isJa?'「停止待機時間」は、ロケットが実際に停止してからの経過時間で判定されるため、発射前に確実にロケットのインベントリ画面を使う時間が確保できます。':'"Grounded Wait" is measured from when the rocket actually stops moving, so there\'s reliably time to use its inventory screen before it launches again.'}</div>`:`<div class="warn-box">${isJa?'loadAllItems/unloadAllItems は v1.2.2+ のみ使用可能です。v1.2.1 では moveItemsFromLaunchPadToRocket を使用してください（ジェネレーターのマニュアルモードで自動対応）。':'loadAllItems/unloadAllItems require v1.2.2+. For v1.2.1, moveItemsFromLaunchPadToRocket is used automatically when Manual mode is selected.'}</div>
 <div class="hint">${isJa?'「帰還待機時間」は最低待機時間として使われ、その後 isRocketPresent() で実際の帰還を確認するので "No rocket found" エラーを防げます。':'"Return Wait" is used as a minimum wait, after which isRocketPresent() confirms the actual return — this prevents "No rocket found" errors.'}</div>`}`;
 }
@@ -1441,7 +1444,7 @@ function renderApi(){
   const v124badge=' <span style="color:var(--accent2);font-size:10px">[v1.2.4+]</span>';
   return`<div class="page-title">${isJa?'Lua API 一覧':'Lua API Reference'}</div>
 <p class="page-desc"><code>launch_pad = peripheral.wrap("top")</code></p>
-${is124?`<div class="warn-box">${isJa?'v1.2.4の変更: アイテム・燃料・カーゴ流体の自動転送API（loadAllItems / unloadAllItems / moveItemsFromLaunchPadToRocket / moveItemsFromRocketToLaunchPad / listLaunchPadInventory / listRocketInventory 等）は廃止されました。積み込み・取り出しはロケットを右クリックして開くインベントリ画面から手動で行います。':'v1.2.4 change: the automatic item/fuel/cargo transfer APIs (loadAllItems / unloadAllItems / moveItemsFromLaunchPadToRocket / moveItemsFromRocketToLaunchPad / listLaunchPadInventory / listRocketInventory, etc.) have been removed. Loading and unloading is now done by hand via the rocket\'s own inventory screen (right-click the rocket).'}</div>`:''}
+${is124?`<div class="hint">${isJa?'v1.2.4の変更: ロケット↔発射台間でアイテムや燃料を「移動」させる自動転送API（moveItemsFromLaunchPadToRocket / moveItemsFromRocketToLaunchPad / listLaunchPadInventory / listRocketInventory 等、および loadAllItems / unloadAllItems）は廃止されました。発射台のインベントリ自体がロケットのものへ統合されたため、もう「転送」という概念がありません。パイプ/ホッパーは発射台経由でそのまま着地中のロケットへ直結しているので、積み込み・取り出し自体は変わらず自動化できます。':'v1.2.4 change: the APIs that "moved" items/fuel *between* the launchpad and the rocket (moveItemsFromLaunchPadToRocket / moveItemsFromRocketToLaunchPad / listLaunchPadInventory / listRocketInventory, etc., plus loadAllItems / unloadAllItems) have been removed. The launchpad\'s inventory has been merged into the rocket\'s, so there\'s no longer a "transfer" to script. Pipes and hoppers still connect through the launchpad straight into whichever rocket is grounded there, so loading/unloading itself can still be fully automated.'}</div>`:''}
 <h2>${isJa?'発射・状態確認':'Launch & Status'}</h2>
 ${apiTable([
   {fn:'launch(planet)',ret:'—',d:isJa?'指定した惑星へロケットを発射。失敗するとエラー。':'Launch rocket to specified planet. Throws on failure.'},
@@ -1461,7 +1464,7 @@ ${apiTable([
 ],th)}
 <h2>${isJa?`燃料（v1.2.2+）`:`Fuel (v1.2.2+)`}</h2>
 ${is111?`<div class="warn-box">${isJa?'v1.2.1 では燃料APIは使用できません。':'Fuel API is not available in v1.2.1.'}</div>`:''}
-${is124?`<div class="hint">${isJa?'v1.2.4以降、これらはロケット自身のタンクの値を返します（ロケットがなければ発射台が最後に追跡していたロケットの値、それも無ければ0/既定容量）。':'Since v1.2.4 these report values from the rocket\'s own tank (or the last-tracked rocket if none is currently on the pad, or 0/default capacity if neither is available).'}</div>`:''}
+${is124?`<div class="hint">${isJa?'v1.2.4以降、これらはロケット自身のタンクの値を返します（ロケットがなければ発射台が最後に追跡していたロケットの値、それも無ければ0/既定容量）。発射台のパイプから供給した分も、着地中ならそのまま同じタンクに反映されます。':'Since v1.2.4 these report values from the rocket\'s own tank (or the last-tracked rocket if none is currently on the pad, or 0/default capacity if neither is available). Anything fed in via the launchpad\'s pipes while the rocket is grounded lands in this same tank.'}</div>`:''}
 ${apiTable([
   {fn:'getFuel()',ret:'int',d:(isJa?'現在の燃料量（mB）。':'Current fuel amount (mB).')+v112badge},
   {fn:'getMaxFuel()',ret:'int',d:(isJa?'最大燃料容量（mB）。':'Max fuel capacity (mB).')+v112badge},
@@ -1484,7 +1487,8 @@ ${apiTable([
   {fn:'listLaunchPadInventory()',ret:'table',d:isJa?'発射台インベントリのアイテム一覧。':'List launchpad inventory.'},
   {fn:'listLaunchPadInputSlotIndexes()',ret:'int[]',d:isJa?'ホッパー等が挿入できるスロット番号一覧。':'Slot indexes hoppers can insert into.'},
   {fn:'listLaunchPadOutputSlotIndexes()',ret:'int[]',d:isJa?'ホッパー等が取り出せるスロット番号一覧。':'Slot indexes hoppers can extract from.'},
-],th)}`:''}
+],th)}`:`<h2>${isJa?'インベントリ':'Inventory'}</h2>
+<div class="hint">${isJa?'発射台↔ロケット間でアイテムを「移動」させるAPIはありません。発射台にホッパーを向けて接続すれば、着地中のロケットのインベントリへ自動的に出し入れされます（積み込み・取り出しの自動化はパイプ/ホッパー側で行う）。':'There\'s no API to "move" items between the launchpad and the rocket. Point a hopper at the launchpad and it inserts into / extracts from the grounded rocket\'s inventory automatically (loading/unloading automation lives on the hopper/pipe side now).'}</div>`}
 <h2>${isJa?`Rocket Scanner連携（v1.2.3+）`:`Rocket Scanner (v1.2.3+)`}</h2>
 ${(modVer!=='v123'&&!is124)?`<div class="warn-box">${isJa?'Rocket Scanner APIは v1.2.3 以降でのみ使用できます。':'Rocket Scanner API is only available in v1.2.3+.'}</div>`:''}
 ${apiTable([
@@ -1504,9 +1508,9 @@ function renderExamples(){
 ${!is111?`<h2>${isJa?'② 燃料・エネルギー両方待機（v1.2.2+）':'② Wait for Both Energy and Fuel (v1.2.2+)'}</h2>
 <pre>local lp = peripheral.wrap("top")\nwhile lp.getEnergy() &lt; lp.getEnergyRequiredForLaunch() do sleep(5) end\nwhile lp.getFuel() &lt; 3000 do\n  print("Fueling... " .. lp.getFuel() .. " mB")\n  sleep(5)\nend\nprint("Ready!")</pre>`:''}
 ${is124?`<h2>${isJa?`${is111?'②':'③'} 停止してから一定時間待って発射`:`${is111?'②':'③'} Wait After Grounding, Then Launch`}</h2>
-<pre>local lp = peripheral.wrap("top")\n-- ${isJa?'積み込みはロケットを右クリックして手動で行う':'Loading is done by hand via the rocket\'s inventory screen'}\nwhile lp.getSecondsSinceLanded() &lt; 30 do\n  print("Grounded: " .. lp.getSecondsSinceLanded() .. "/30 sec")\n  sleep(5)\nend\nlp.launch("ad_astra:moon")</pre>
+<pre>local lp = peripheral.wrap("top")\n-- ${isJa?'積み込みはパイプ/ホッパーで自動化、または手動で行う':'Loading can be automated via pipe/hopper, or done by hand'}\nwhile lp.getSecondsSinceLanded() &lt; 30 do\n  print("Grounded: " .. lp.getSecondsSinceLanded() .. "/30 sec")\n  sleep(5)\nend\nlp.launch("ad_astra:moon")</pre>
 <h2>${isJa?'④ 空になるまで発射しない（安全装置）':'④ Don\'t Relaunch Until Empty (Safety Check)'}</h2>
-<pre>local lp = peripheral.wrap("top")\nwhile not lp.isRocketInventoryEmpty() do\n  print("Still has cargo, waiting to be unloaded by hand...")\n  sleep(5)\nend\nlp.launch("minecraft:overworld")</pre>
+<pre>local lp = peripheral.wrap("top")\nwhile not lp.isRocketInventoryEmpty() do\n  print("Still has cargo, waiting to be unloaded...")\n  sleep(5)\nend\nlp.launch("minecraft:overworld")</pre>
 <h2>${isJa?'⑤ 飛行中の目的地を確認':'⑤ Check In-Flight Destination'}</h2>
 <pre>local lp = peripheral.wrap("top")\nlocal target = lp.getTargetPlanet()\nif target == "none" then\n  print("Rocket is grounded")\nelse\n  print("Rocket is flying to " .. target)\nend</pre>`:`<h2>${isJa?`${is111?'②':'③'} v1.2.1 マニュアルスロット転送`:`${is111?'②':'③'} v1.2.1 Manual Slot Transfer`}</h2>
 <pre>local lp = peripheral.wrap("top")\n-- ${isJa?'スロット10番からロケットの1番へ':'Move from pad slot 10 to rocket slot 1'}\nlp.moveItemsFromLaunchPadToRocket(10, 1)\nlp.launch("ad_astra:moon")\nsleep(30)\nlp.moveItemsFromRocketToLaunchPad(1, 10)</pre>
@@ -1529,15 +1533,15 @@ ${errCards([
 ${errCards([
   {cls:'',t:'No rocket found',b:isJa?'<strong>原因：</strong> 発射台にロケットがない。<br><strong>解決：</strong> ロケットを発射台の中央ブロックに設置する。':'<strong>Cause:</strong> No rocket on launchpad.<br><strong>Fix:</strong> Place rocket on the central block.'},
   {cls:'',t:'Not enough energy to launch',b:isJa?'<strong>原因：</strong> エネルギー不足（通常 500,000 FE 必要）。<br><strong>解決：</strong> 発電機で供給。<code>launch_pad.getEnergy()</code> で確認。':'<strong>Cause:</strong> Insufficient energy (500,000 FE needed).<br><strong>Fix:</strong> Supply energy. Check with <code>launch_pad.getEnergy()</code>.'},
-  {cls:'',t:'Not enough fuel to launch',b:is124?(isJa?'<strong>原因：</strong> 燃料不足（3000 mB 必要）。<br><strong>解決：</strong> ロケットを右クリックして開くインベントリ画面で、燃料バケツをスロットに入れて補充する。':'<strong>Cause:</strong> Fuel tank empty (3000 mB needed).<br><strong>Fix:</strong> Right-click the rocket to open its inventory screen and place a fuel bucket in the slot to refill it.'):(isJa?'<strong>原因：</strong> 燃料不足（3000 mB 必要）。<br><strong>解決：</strong> 発射台の底面にパイプで供給、またはバケツで右クリック。':'<strong>Cause:</strong> Fuel tank empty (3000 mB needed).<br><strong>Fix:</strong> Connect fuel pipe to BOTTOM face, or right-click with fuel bucket.')},
+  {cls:'',t:'Not enough fuel to launch',b:is124?(isJa?'<strong>原因：</strong> 燃料不足（3000 mB 必要）。<br><strong>解決：</strong> 発射台の底面にパイプで供給（着地中のロケットのタンクへ直結）、ロケットを右クリックして開くインベントリ画面で燃料バケツをスロットに入れる、または発射台の底面をバケツで右クリック。':'<strong>Cause:</strong> Fuel tank empty (3000 mB needed).<br><strong>Fix:</strong> Pipe fuel into the launchpad\'s BOTTOM face (it connects directly to the grounded rocket\'s tank), place a fuel bucket in the rocket\'s own inventory screen, or right-click the bottom face with a bucket.'):(isJa?'<strong>原因：</strong> 燃料不足（3000 mB 必要）。<br><strong>解決：</strong> 発射台の底面にパイプで供給、またはバケツで右クリック。':'<strong>Cause:</strong> Fuel tank empty (3000 mB needed).<br><strong>Fix:</strong> Connect fuel pipe to BOTTOM face, or right-click with fuel bucket.')},
   {cls:'',t:'<planet> is too high of a tier for this rocket',b:isJa?'<strong>原因：</strong> ロケットのティアが目的地に対して不足。<br><strong>解決：</strong> 高ティアのロケットを使用する。':'<strong>Cause:</strong> Rocket tier too low for destination.<br><strong>Fix:</strong> Use a higher tier rocket.'},
   {cls:'warn',t:'<planet> is not a valid planet',b:isJa?'<strong>原因：</strong> 惑星IDのタイポ。<br><strong>解決：</strong> <code>launch_pad.getValidDestinations()</code> で正しいIDを確認。':'<strong>Cause:</strong> Typo in planet ID.<br><strong>Fix:</strong> Check correct IDs with <code>launch_pad.getValidDestinations()</code>.'},
 ])}
 <h2>${isJa?'よくある質問':'FAQ'}</h2>
 ${errCards(is124?[
-  {cls:'ok',t:isJa?'アイテムやカーゴ流体を発射台から積めない':'Cannot load items or cargo fluid from the launchpad',b:isJa?'v1.2.4以降、ランチパッド経由の自動転送は廃止されました。ロケットが地上で停止している間に右クリックして、専用のインベントリ画面から直接アイテムやバケツを出し入れしてください。':'As of v1.2.4, automatic transfer via the launchpad has been removed. While the rocket is grounded, right-click it to open its own inventory screen and place items or buckets directly.'},
+  {cls:'ok',t:isJa?'アイテムやカーゴ流体を発射台から積めない':'Cannot load items or cargo fluid from the launchpad',b:isJa?'v1.2.4で発射台↔ロケット間の「転送」APIは廃止されましたが、発射台のパイプ・ホッパー接続自体はそのまま使えます。ロケットが地上で停止している間、発射台に繋いだパイプ/ホッパーはそのロケットのタンク/インベントリへ直結しているはずです。ロケットがいない、または飛行中の場合は何も受け付けないので、まずisRocketPresent()で確認してください。ロケットを右クリックして開くインベントリ画面から直接入れることもできます。':'The launchpad↔rocket "transfer" APIs were removed in v1.2.4, but the launchpad\'s pipe and hopper connections still work as before. While a rocket is grounded, pipes/hoppers connected to the launchpad should feed straight into that rocket\'s own tank/inventory. If no rocket is present (or it\'s mid-flight), the connection has nowhere to deliver to — check with isRocketPresent() first. You can also place items directly via the rocket\'s own inventory screen (right-click it).'},
   {cls:'ok',t:isJa?'スクリプトを止めたい':'How to stop the script',b:isJa?'PCを開いた状態で Ctrl+T を押すと強制終了。':'Press Ctrl+T while the PC is open.'},
-  {cls:'ok',t:isJa?'前回の荷物を降ろし忘れたまま再発射してしまう':'The rocket relaunches before last trip\'s cargo is unloaded',b:isJa?'ジェネレーターの「発射前チェック」で「ロケットのインベントリが空になるまで発射しない」を有効にすると、手動で降ろし切るまで発射を待機します。':'Enable "Don\'t launch until the rocket\'s inventory is empty" under "Pre-Launch Check" in the generator — it holds the launch until you\'ve unloaded it by hand.'},
+  {cls:'ok',t:isJa?'前回の荷物を降ろし忘れたまま再発射してしまう':'The rocket relaunches before last trip\'s cargo is unloaded',b:isJa?'ジェネレーターの「発射前チェック」で「ロケットのインベントリが空になるまで発射しない」を有効にすると、ホッパーやパイプでの自動排出、または手動での取り出しが完了するまで発射を待機します。':'Enable "Don\'t launch until the rocket\'s inventory is empty" under "Pre-Launch Check" in the generator — it holds the launch until it\'s been emptied, whether that happens automatically via hopper/pipe or by hand.'},
   {cls:'ok',t:isJa?'再起動したらスクリプトが動かない':'Script does not run after reboot',b:isJa?'ファイル名を startup.lua にすることでPC起動時に自動実行されます。':'Name the file startup.lua for auto-run on boot.'},
 ]:[
   {cls:'ok',t:isJa?'スロット1〜9にアイテムを入れたのにロケットに積まれない':'Items in slots 1–9 do not load into rocket',b:isJa?'スロット1〜9はホッパー用インプットスロット。マニュアルモードでは10番以降を使ってください。':'Slots 1–9 are hopper input slots. Use slot 10+ in Manual mode.'},
